@@ -102,7 +102,7 @@ impl Scanner{
             self.current+=1;
         }
     }
-    fn skip_white_scape(&mut self){
+    fn skip_whitespace(&mut self){
         loop {
             let c = self.peek(0);
             if c == ' ' || c == '\t' {
@@ -118,7 +118,32 @@ impl Scanner{
             }
         }
     }
+    fn read_number(&mut self) -> Token{
+        let start = self.current;
+        while self.peek(0).is_numeric() {
+            self.advance();
+        }
+        let lexeme = self.code.chars().skip(start as usize).take((self.current-start) as usize).collect();
+        return Token::new(TokenType::NUMBER, lexeme, self.line);
+    }
     pub fn tokenize(&mut self) -> &Vec<Token> {
+        let size = self.code.chars().count() as u32 ;
+        while self.current < size {
+
+            let ch = {
+                self.skip_whitespace();
+                self.peek(0)
+            };
+            if ch.is_numeric(){
+                let token = self.read_number();
+                self.tokens.push(token);
+            } else {
+                self.advance();
+            }
+        }
+        let eof = Token::new(TokenType::EOF, "".to_string(), self.line);
+        self.tokens.push(eof);
+
         return &self.tokens;
     }
 

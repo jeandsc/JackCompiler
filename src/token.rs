@@ -60,4 +60,15 @@ pub struct Token {
     pub kind: TokenType,
     pub lexeme: String,
     pub line: u32,
+
+}
+impl Token {
+    pub fn new(kind:TokenType, lexeme:String, line:u32) -> Self{
+        Self {
+            kind,
+            lexeme,
+            line
+        }
+
+    }    
 }

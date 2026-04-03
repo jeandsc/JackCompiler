@@ -11,6 +11,9 @@ mod tests {
         let tokens:&Vec<Token> = scanner.tokenize();
 
         assert_eq!(tokens[0].kind, TokenType::NUMBER);
+        assert_eq!(tokens[0].lexeme, "322");
+
+        println!("Teste Passou!")
 
     }
 }
