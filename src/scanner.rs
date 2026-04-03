@@ -2,7 +2,7 @@ use crate::token::{Token, TokenType};
 use std::collections::HashMap; 
 
 pub struct Scanner {
-    code: &'static str,
+    code: String,
     current: u32,
     line: u32,
     tokens: Vec<Token>,
@@ -13,7 +13,7 @@ pub struct Scanner {
 
 }
 impl Scanner{
-    pub fn new(code:&'static str) -> Self{
+    pub fn new(code:String) -> Self{
         //declaração de symbols da linguagem Jack
         let mut symbols = HashMap::new();
         symbols.insert('(', TokenType::LPAREN);
