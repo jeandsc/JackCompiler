@@ -1,8 +1,8 @@
 use crate::token::{Token, TokenType};
 use std::collections::HashMap; 
 
-struct Scanner {
-    code: String,
+pub struct Scanner {
+    code: &'static str,
     current: u32,
     line: u32,
     tokens: Vec<Token>,
@@ -13,7 +13,7 @@ struct Scanner {
 
 }
 impl Scanner{
-    fn new(code:String) -> Self{
+    pub fn new(code:&'static str) -> Self{
         //declaração de symbols da linguagem Jack
         let mut symbols = HashMap::new();
         symbols.insert('(', TokenType::LPAREN);
@@ -101,6 +101,25 @@ impl Scanner{
             }
             self.current+=1;
         }
+    }
+    fn skip_white_scape(&mut self){
+        loop {
+            let c = self.peek(0);
+            if c == ' ' || c == '\t' {
+                self.advance();
+            }
+            else if c == '\r' {
+                self.advance();
+            }
+            else if c == '\n'{
+                self.advance();
+            } else {
+                break;
+            }
+        }
+    }
+    pub fn tokenize(&mut self) -> &Vec<Token> {
+        return &self.tokens;
     }
 
 }
