@@ -1,4 +1,4 @@
-enum TokenType {
+pub enum TokenType {
 
     //literals
 
@@ -55,7 +55,7 @@ enum TokenType {
 
 }
 
-struct Token {
+pub struct Token {
     pub kind: TokenType,
     pub lexeme: String,
     pub line: u32,
