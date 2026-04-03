@@ -84,11 +84,23 @@ impl Scanner{
 
     fn peek(&self, offset:u32) -> char{
         let pos = self.current + offset;
-        if pos < (self.code.len()) as u32 {
+        //está contando caracteres na string
+        if pos < (self.code.chars().count()) as u32 {
             return self.code.chars().nth(pos as usize).unwrap();
         } else {
             return '\0'; 
         }
         
     }
+
+    fn advance(&mut self) {
+        let size = self.code.chars().count() as u32 ;
+        if self.current < size {
+            if self.code.chars().nth(self.current as usize).unwrap() == '\n' {
+                self.line+=1;
+            }
+            self.current+=1;
+        }
+    }
+
 }
