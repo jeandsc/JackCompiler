@@ -1,7 +1,10 @@
 #[cfg(test)]
 mod tests {
-    use JackCompiler::scanner::{self, Scanner}; 
+    use JackCompiler::scanner::{Scanner}; 
     use JackCompiler::token::{Token, TokenType};
+    use std::fs;
+    use std::path::Path;
+    use JackCompiler::xml_generator::generate_xml;
 
 
     #[test]
@@ -162,5 +165,39 @@ mod tests {
     assert!(lexemes.contains(&"Main".to_string()));
     assert!(lexemes.contains(&"x".to_string()));
     assert!(lexemes.contains(&"5".to_string()));
+    }
+    #[test]
+    fn test_validacao_nand2tetris_square_main(){
+        let jack_path = "tests/nand2tetris_files/Square/Main.jack";
+        let xml_referencia_path = "tests/nand2tetris_files/Square/MainT.xml";
+        assert!(
+            Path::new(jack_path).exists(),
+            "Arquivo Jack não encontrado: {}",
+            jack_path
+        );
+
+        assert!(
+            Path::new(xml_referencia_path).exists(),
+            "Arquivo XML de referência não encontrado: {}",
+            xml_referencia_path
+        );
+        let code =fs::read_to_string(jack_path).expect("Falha ao ler arquivo");
+        let mut xml_referencia = fs::read_to_string(xml_referencia_path).expect("Falha ao ler arquivo");
+        let mut scanner = Scanner::new(code);
+        let mut xml_gerado = generate_xml(scanner);
+
+        xml_gerado = xml_gerado.replace("\r\n", "\n");
+        xml_referencia = xml_referencia.replace("\r\n", "\n");
+
+        assert_eq!(xml_gerado, xml_referencia);
+        println!("Passou!")
+
+
+    }
+    #[test]
+    fn test_todos_os_codigos_nand2tetris(){
+        let pasta = "tests/nand2tetris_files/Square";
+
+
     }
 }
