@@ -118,6 +118,37 @@ impl Scanner{
             }
         }
     }
+    fn skip_line_comment(&mut self){
+        let ch = self.peek(0);
+        let ch_next = self.peek(1);
+        if ch=='/' && ch_next=='/'{
+            loop {
+                let ch = self.peek(0);
+                if ch == '\n' || ch == '\0'{
+                    self.advance();
+                    break;
+                }
+                self.advance();
+            }
+        } 
+    }
+    fn skip_multiline_comment(&mut self){
+        self.advance();
+        self.advance();
+        loop {
+            if self.peek(0)=='*' && self.peek(1)=='/'{
+                self.advance();
+                self.advance();
+                break;
+            }
+            if self.peek(0) =='\0'{
+                panic!("SyntaxError: comentário não fechado em {}", self.line)
+            }
+            
+            self.advance();
+        }
+
+    }
     fn read_number(&mut self) -> Token{
         let start = self.current;
         while self.peek(0).is_numeric() {
@@ -178,17 +209,33 @@ impl Scanner{
             self.advance();
             return symb;
         } else {
-            !panic!("SyntaxError: Simbolo Desconhecido")
+            panic!("SyntaxError: Simbolo Desconhecido {} ", ch)
         }
     }
     pub fn tokenize(&mut self) -> &Vec<Token> {
         let size = self.code.chars().count() as u32 ;
         while self.current < size {
-
+            
             let ch = {
                 self.skip_whitespace();
                 self.peek(0)
             };
+            if self.peek(0) == '/' && self.peek(1) == '/'{
+                self.skip_line_comment();
+                if self.current >= size{
+                    break
+                }
+                continue;
+
+            }
+            if self.peek(0)=='/' && self.peek(1) == '*'{
+                self.skip_multiline_comment();
+                if self.current >= size{
+                    break
+                }
+                continue;
+            }
+            
             if ch.is_ascii_digit(){
                 let token = self.read_number();
                 self.tokens.push(token);

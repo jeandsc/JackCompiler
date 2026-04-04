@@ -117,7 +117,20 @@ mod tests {
     }
     #[test]
     fn teste_ignorar_comentarios(){
-        let code = "let x = 5; // isto some";
-        
+        let code = "let x = 5; // isto some".to_string();
+        let mut scanner = Scanner::new(code);
+        let tokens = scanner.tokenize();
+
+        assert_eq!(tokens.len(), 6);
+
+    }
+    #[test]
+    fn teste_ignorar_comentario_multilinha(){
+        let code = "let x = 5; /* isto deve ser ignorado */ let y = 10;".to_string();
+        let mut scanner = Scanner::new(code);
+        let tokens = scanner.tokenize();
+
+    
+        assert_eq!(tokens.len(), 11);
     }
 }
