@@ -126,7 +126,7 @@ impl Scanner{
         let lexeme = self.code.chars().skip(start as usize).take((self.current-start) as usize).collect();
         return Token::new(TokenType::NUMBER, lexeme, self.line);
     }
-    pub fn read_string(&mut self) -> Token {
+    fn read_string(&mut self) -> Token {
         
         self.advance();
 
@@ -147,9 +147,28 @@ impl Scanner{
         }
         let lexeme = self.code.chars().skip(start as usize).take((self.current-start) as usize).collect();
         self.advance();
+
         
         return Token::new(TokenType::STRING, lexeme, self.line);
 
+    }
+    fn read_identifier_keyword(&mut self) ->Token {
+        let start =self.current;
+        self.advance();
+        let mut ch = self.peek(0);
+        while ch.is_ascii_alphanumeric() || ch == '_' {
+            self.advance();
+            ch = self.peek(0);
+        }
+        let lexeme:String = self.code.chars().skip(start as usize).take((self.current-start) as usize).collect();
+        
+        if let Some(v) = self.keywords.get(lexeme.as_str()) {
+            return Token::new(*v, lexeme, self.line);
+        } else {
+            return Token::new(TokenType::IDENT, lexeme, self.line);
+        }
+        
+        
     }
     pub fn tokenize(&mut self) -> &Vec<Token> {
         let size = self.code.chars().count() as u32 ;
@@ -159,13 +178,16 @@ impl Scanner{
                 self.skip_whitespace();
                 self.peek(0)
             };
-            if ch.is_numeric(){
+            if ch.is_ascii_digit(){
                 let token = self.read_number();
                 self.tokens.push(token);
             } else if ch == '\"'  {
                 let token = self.read_string();
                 self.tokens.push(token)
-            } else {
+            } else if ch.is_ascii_alphabetic() || ch=='_'{
+                let token = self.read_identifier_keyword();
+                self.tokens.push(token);
+            }else {
                 self.advance();
             }
         }
@@ -174,5 +196,6 @@ impl Scanner{
 
         return &self.tokens;
     }
+    
 
 }
