@@ -133,4 +133,34 @@ mod tests {
     
         assert_eq!(tokens.len(), 11);
     }
+    #[test]
+    fn teste_codigo_jack_completo() {
+    let code = r#"
+    class Main {
+        function void main() {
+            let x = 5;
+            return;
+        }
+    }
+    "#.to_string();
+
+    let mut scanner = Scanner::new(code);
+    let tokens = scanner.tokenize();
+
+    
+    let tipos: Vec<TokenType> = tokens.iter().map(|t| t.kind).collect();
+    let lexemes: Vec<String> = tokens.iter().map(|t| t.lexeme.clone()).collect();
+
+   
+    assert!(tipos.contains(&TokenType::CLASS));
+    assert!(tipos.contains(&TokenType::FUNCTION));
+    assert!(tipos.contains(&TokenType::IDENT));
+    assert!(tipos.contains(&TokenType::NUMBER));
+    assert!(tipos.contains(&TokenType::EQ));
+
+    
+    assert!(lexemes.contains(&"Main".to_string()));
+    assert!(lexemes.contains(&"x".to_string()));
+    assert!(lexemes.contains(&"5".to_string()));
+    }
 }
