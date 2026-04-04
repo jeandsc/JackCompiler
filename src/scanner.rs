@@ -126,6 +126,31 @@ impl Scanner{
         let lexeme = self.code.chars().skip(start as usize).take((self.current-start) as usize).collect();
         return Token::new(TokenType::NUMBER, lexeme, self.line);
     }
+    pub fn read_string(&mut self) -> Token {
+        
+        self.advance();
+
+        let start = self.current;
+        
+        while (self.peek(0) != '\"') && (self.peek(0) != '\0'){
+            let mut c = self.peek(0);
+            if c == '\n' {
+                panic!("String não fechada em  {}", self.line);
+            }
+            
+            self.advance();
+            
+        }
+        
+        if self.peek(0) == '\0'{
+            panic!("String não fechada em  {}", self.line);
+        }
+        let lexeme = self.code.chars().skip(start as usize).take((self.current-start) as usize).collect();
+        self.advance();
+        
+        return Token::new(TokenType::STRING, lexeme, self.line);
+
+    }
     pub fn tokenize(&mut self) -> &Vec<Token> {
         let size = self.code.chars().count() as u32 ;
         while self.current < size {
@@ -137,6 +162,9 @@ impl Scanner{
             if ch.is_numeric(){
                 let token = self.read_number();
                 self.tokens.push(token);
+            } else if ch == '\"'  {
+                let token = self.read_string();
+                self.tokens.push(token)
             } else {
                 self.advance();
             }

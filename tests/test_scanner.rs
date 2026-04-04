@@ -16,9 +16,6 @@ mod tests {
         println!("Teste Passou!")
 
     }
-    mod tests {
-    use super::*; // importa Scanner, Token, TokenType
-
     #[test]
     fn teste_multiplos_numeros() {
         let code = "12 34 56".to_string();
@@ -44,5 +41,36 @@ mod tests {
 
         println!("✅ Teste de múltiplos números passou!");
     }
-}
+    #[test]
+    fn test_string_basica(){
+        let code = r#""hello""#.to_string();
+        println!("{}", code);
+        let mut scanner = Scanner::new(code);
+        let tokens = scanner.tokenize();
+        
+        assert_eq!(tokens[0].kind, TokenType::STRING);
+        assert_eq!(tokens[0].lexeme, r#"hello"#.to_string());
+
+    }
+    #[test]
+    fn test_numeros_e_strings() {
+    let code = r#"123"hello""world"456"#.to_string();
+    println!("{}", code);
+    let mut scanner = Scanner::new(code);
+    let tokens = scanner.tokenize();
+
+    assert_eq!(tokens[0].kind, TokenType::NUMBER);
+    assert_eq!(tokens[0].lexeme, "123".to_string());
+
+    assert_eq!(tokens[1].kind, TokenType::STRING);
+    assert_eq!(tokens[1].lexeme, "hello".to_string());
+
+    assert_eq!(tokens[2].kind, TokenType::STRING);
+    assert_eq!(tokens[2].lexeme, "world".to_string());
+
+    assert_eq!(tokens[3].kind, TokenType::NUMBER);
+    assert_eq!(tokens[3].lexeme, "456".to_string());
+
+    println!("✅ Teste de número + strings passou!");
+    }
 }
