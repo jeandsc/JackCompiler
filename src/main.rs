@@ -54,13 +54,15 @@ fn main() {
             let scanner = Scanner::new(code);
             let mut xml_gerado = generate_xml(scanner);
 
+            if let Err(e) = salvar_xml(output, &format!("{}", arquivos_jack[i]).replace(".jack", "T.xml"), &xml_gerado) {
+                println!("Erro ao salvar XML: {}", e);
+            }
+            
             xml_gerado = xml_gerado.replace("\r\n", "\n");
             xml_referencia = xml_referencia.replace("\r\n", "\n");
            
             assert_eq!(xml_gerado, xml_referencia);
 
-            if let Err(e) = salvar_xml(output, format!("{}T.xml",arquivos_jack[i]).as_str(), &xml_gerado) {
-                println!("Erro ao salvar XML: {}", e);
-            }
+            
     }
 }
