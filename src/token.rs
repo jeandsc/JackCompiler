@@ -108,11 +108,17 @@ impl Token {
 
     }
     pub fn to_xml(&self) -> String{
-        if self.kind == TokenType::EOF {
-            return "".to_string();
+        if self.kind == TokenType::AND {
+            return format!("<{}> &amp </{}>",self.kind.xml_tag(), self.kind.xml_tag());
+        } else if self.kind == TokenType::GT {
+            return format!("<{}> &gt </{}>",self.kind.xml_tag(), self.kind.xml_tag());
+        } else if self.kind == TokenType::LT {
+            return format!("<{}> &gt </{}>",self.kind.xml_tag(), self.kind.xml_tag());
+        } else {
+            return format!("<{}> {} </{}>",self.kind.xml_tag(), self.lexeme, self.kind.xml_tag());
         }
 
-        return format!("<{}> {} </{}>",self.kind.xml_tag(), self.lexeme, self.kind.xml_tag());
+        
 
     }    
 }
