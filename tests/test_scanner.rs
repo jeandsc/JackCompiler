@@ -99,4 +99,25 @@ mod tests {
         
 
     }
+    #[test]
+    fn test_symbolos_xml(){
+        let code = "x+y;".to_string();
+        let mut scanner = Scanner::new(code);
+        let tokens = scanner.tokenize();
+
+        let lista_xmls = vec![
+        "<identifier> x </identifier>",
+        "<symbol> + </symbol>",
+        "<identifier> y </identifier>",
+        "<symbol> ; </symbol>"];
+        
+        for i in 0..lista_xmls.len(){
+            assert_eq!(tokens[i].to_xml(), lista_xmls[i])
+        }
+    }
+    #[test]
+    fn teste_ignorar_comentarios(){
+        let code = "let x = 5; // isto some";
+        
+    }
 }

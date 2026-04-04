@@ -170,6 +170,17 @@ impl Scanner{
         
         
     }
+    fn read_symbol(&mut self) -> Token{
+        let ch = self.peek(0);
+        let lexeme = ch.to_string();
+        if let Some(v) = self.symbols.get(&ch){
+            let symb = Token::new(*v, lexeme, self.line);
+            self.advance();
+            return symb;
+        } else {
+            !panic!("SyntaxError: Simbolo Desconhecido")
+        }
+    }
     pub fn tokenize(&mut self) -> &Vec<Token> {
         let size = self.code.chars().count() as u32 ;
         while self.current < size {
@@ -186,6 +197,9 @@ impl Scanner{
                 self.tokens.push(token)
             } else if ch.is_ascii_alphabetic() || ch=='_'{
                 let token = self.read_identifier_keyword();
+                self.tokens.push(token);
+            }else if let Some(v) = self.symbols.get(&ch){
+                let token = self.read_symbol();
                 self.tokens.push(token);
             }else {
                 self.advance();
