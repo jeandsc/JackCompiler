@@ -46,9 +46,15 @@ impl Parser {
             if token.kind == expected_type {
                 self.write_tag(&token);
             } else {
-                //panic!("SyntaxError: Esperava {} e encontrou {} na linha {}", expected_type, token.kind, token.line)
+                panic!("SyntaxError: Esperava {} e encontrou {} na linha {}", expected_type, token.kind, token.line)
             }
 
         }
+    }
+    pub fn get_xml(&mut self)->String{
+            self.xml_output.join("\n")
+    }
+    pub fn parse_code(&mut self){
+        parse_class();
     }
 }

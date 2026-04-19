@@ -1,5 +1,5 @@
 
-
+use std::fmt;
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum TokenType {
 
@@ -86,6 +86,64 @@ impl TokenType {
 
             
         }
+    }
+}
+impl fmt::Display for TokenType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            TokenType::NUMBER => "number",
+            TokenType::STRING => "string",
+            TokenType::IDENT => "identifier",
+            
+          
+            TokenType::CLASS => "class",
+            TokenType::CONSTRUCTOR => "constructor",
+            TokenType::FUNCTION => "function",
+            TokenType::METHOD => "method",
+            TokenType::FIELD => "field",
+            TokenType::STATIC => "static",
+            TokenType::VAR => "var",
+            TokenType::INT => "int",
+            TokenType::CHAR => "char",
+            TokenType::BOOLEAN => "boolean",
+            TokenType::VOID => "void",
+            TokenType::TRUE => "true",
+            TokenType::FALSE => "false",
+            TokenType::NULL => "null",
+            TokenType::THIS => "this",
+            TokenType::LET => "let",
+            TokenType::DO => "do",
+            TokenType::IF => "if",
+            TokenType::ELSE => "else",
+            TokenType::WHILE => "while",
+            TokenType::RETURN => "return",
+            
+    
+            TokenType::LPAREN => "(",
+            TokenType::RPAREN => ")",
+            TokenType::LBRACE => "{",
+            TokenType::RBRACE => "}",
+            TokenType::LBRACKET => "[",
+            TokenType::RBRACKET => "]",
+            TokenType::COMMA => ",",
+            TokenType::SEMICOLON => ";",
+            TokenType::DOT => ".",
+            TokenType::PLUS => "+",
+            TokenType::MINUS => "-",
+            TokenType::ASTERISK => "*",
+            TokenType::SLASH => "/",
+            TokenType::AND => "&",
+            TokenType::OR => "|",
+            TokenType::NOT => "~",
+            TokenType::LT => "<",
+            TokenType::GT => ">",
+            TokenType::EQ => "=",
+            
+            TokenType::EOF => "EOF",
+  
+
+        };
+        write!(f, "{}", s)
     }
 }
 
