@@ -26,17 +26,22 @@ impl Parser {
         self.pos = self.pos+1;
     }
     fn open_tag(&mut self, tag_name:&str){
-        let ident = " ".repeat(self.ident_level);
+        let ident = "  ".repeat(self.ident_level);
         let tag = format!("{}<{}>", ident,tag_name);
-        self.xml_output.push(tag);      
+        self.xml_output.push(tag);
+        self.ident_level +=1;     
     }
     fn close_tag(&mut self, tag_name:&str){
-        let ident = " ".repeat(self.ident_level);
+        self.ident_level -=1;  
+        let ident = "  ".repeat(self.ident_level);
         let tag = format!("{}</{}>", ident,tag_name);
         self.xml_output.push(tag);      
     }
     fn write_tag(&mut self, token:&Token){
-        let ident = " ".repeat(self.ident_level);
+        if token.kind == TokenType::EOF {
+            return;
+        }
+        let ident = "  ".repeat(self.ident_level);
         let tag = format!("{}{}", ident, token.to_xml());
         self.xml_output.push(tag);
     }
@@ -45,6 +50,7 @@ impl Parser {
         if let Some(token) = self.peek(0) {
             if token.kind == expected_type {
                 self.write_tag(&token);
+                self.advance();
             } else {
                 panic!("SyntaxError: Esperava {} e encontrou {} na linha {}", expected_type, token.kind, token.line)
             }
@@ -55,6 +61,15 @@ impl Parser {
             self.xml_output.join("\n")
     }
     pub fn parse_code(&mut self){
-        parse_class();
+        self.parse_class();
+    }
+    pub fn parse_class(&mut self){
+        self.open_tag("class");
+        self.assert(TokenType::CLASS);
+        self.assert(TokenType::IDENT);
+        self.assert(TokenType::LBRACE);
+        self.assert(TokenType::RBRACE);
+        self.assert(TokenType::EOF);
+        self.close_tag("class");
     }
 }

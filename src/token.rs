@@ -173,6 +173,8 @@ impl Token {
             return format!("<{}> &gt; </{}>",self.kind.xml_tag(), self.kind.xml_tag());
         } else if self.kind == TokenType::LT {
             return format!("<{}> &lt; </{}>",self.kind.xml_tag(), self.kind.xml_tag());
+        } else if self.kind == TokenType::EOF {
+            return "".to_string();
         } else {
             return format!("<{}> {} </{}>",self.kind.xml_tag(), self.lexeme, self.kind.xml_tag());
         }

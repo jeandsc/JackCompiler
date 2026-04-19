@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use JackCompiler::scanner::{Scanner}; 
+    use JackCompiler::scanner::{Scanner};
+    use JackCompiler::parser::{Parser}; 
     use JackCompiler::token::{Token, TokenType};
     use std::fs;
     use std::path::Path;
@@ -18,11 +19,11 @@ mod tests {
         parser.parse_code();
        
         let expected = r#"<class>
-    <keyword> class </keyword>
-    <identifier> Main </identifier>
-    <symbol> { </symbol>
-    <symbol> } </symbol>
-    </class>"#;
-        assert_eq!(parser.get_xml().trim(), expected);
+  <keyword> class </keyword>
+  <identifier> Main </identifier>
+  <symbol> { </symbol>
+  <symbol> } </symbol>
+</class>"#;
+        assert_eq!(parser.get_xml(), expected);
     }
 }
