@@ -1,7 +1,7 @@
 pub mod xml_generator;
 pub mod token;
 pub mod scanner;
-
+pub mod parser;
 
 use std::fs;
 use std::fs::File;

@@ -89,6 +89,7 @@ impl TokenType {
     }
 }
 
+#[derive(Clone)]
 pub struct Token {
     pub kind: TokenType,
     pub lexeme: String,
