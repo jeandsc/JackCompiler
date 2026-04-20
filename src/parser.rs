@@ -1,4 +1,21 @@
+use std::array;
+
 use crate::token::{Token, TokenType};
+
+#[derive(Debug)]
+enum ParserError {
+    UnexpectedEOF,
+    ExpectedToken(TokenType),
+    // outros...
+}
+
+// Implemente Display e Error se quiser usar ? com anyhow ou std::error
+impl std::fmt::Display for ParserError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+impl std::error::Error for ParserError {}
 
 pub struct Parser {
     tokens: Vec<Token>,
@@ -63,13 +80,28 @@ impl Parser {
     pub fn parse_code(&mut self){
         self.parse_class();
     }
-    pub fn parse_class(&mut self){
+    fn parse_class(&mut self){
         self.open_tag("class");
         self.assert(TokenType::CLASS);
         self.assert(TokenType::IDENT);
         self.assert(TokenType::LBRACE);
+
         self.assert(TokenType::RBRACE);
         self.assert(TokenType::EOF);
         self.close_tag("class");
+    }
+    fn parse_class_var_dec(&mut self) ->Result<(), ParserError>{
+        self.open_tag("classVarDec");
+        let modifiers = [TokenType::STATIC, TokenType::FIELD];
+        let actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        if modifiers.contains(&actual.kind) {
+        } else {
+            if actual.kind == TokenType::STATIC {
+                self.assert(TokenType::STATIC);
+                //self.parse_type()
+            }
+        }
+        self.close_tag("classVarDec");
+        Ok(())   
     }
 }
