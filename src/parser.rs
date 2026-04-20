@@ -86,9 +86,10 @@ impl Parser {
         self.assert(TokenType::CLASS);
         self.assert(TokenType::IDENT);
         self.assert(TokenType::LBRACE);
-        let actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
-        if modifiers.contains(&actual.kind){
+        let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        while modifiers.contains(&actual.kind){
             self.parse_class_var_dec();
+            actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
         }
         self.assert(TokenType::RBRACE);
         self.assert(TokenType::EOF);
@@ -114,6 +115,7 @@ impl Parser {
                 self.assert(TokenType::SEMICOLON);
 
             }
+        
         } else {
             
         }
@@ -121,13 +123,13 @@ impl Parser {
         Ok(())   
     }
     fn parse_type(&mut self) -> Result<(), ParserError>{
-        let types = [TokenType::INT, TokenType::STRING, TokenType::BOOLEAN];
+        let types = [TokenType::INT, TokenType::CHAR, TokenType::BOOLEAN];
         let actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
         if types.contains(&actual.kind){
             if actual.kind == TokenType::INT{
                 self.assert(TokenType::INT);
-            } else if actual.kind == TokenType::STRING{
-                self.assert(TokenType::STRING);
+            } else if actual.kind == TokenType::CHAR{
+                self.assert(TokenType::CHAR);
             } else if actual.kind == TokenType::BOOLEAN{
                 self.assert(TokenType::BOOLEAN);
             }  
@@ -144,6 +146,12 @@ impl Parser {
     }
     fn parse_var_name(&mut self) -> Result<(), ParserError>{
         self.assert(TokenType::IDENT);
+        let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        while actual.kind == TokenType::COMMA {
+            self.assert(TokenType::COMMA);
+            self.assert(TokenType::IDENT);
+            actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        }
         
         Ok(())
     }
