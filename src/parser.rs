@@ -80,28 +80,71 @@ impl Parser {
     pub fn parse_code(&mut self){
         self.parse_class();
     }
-    fn parse_class(&mut self){
+    fn parse_class(&mut self) ->Result<(), ParserError>{
+        let modifiers = [TokenType::STATIC, TokenType::FIELD];
         self.open_tag("class");
         self.assert(TokenType::CLASS);
         self.assert(TokenType::IDENT);
         self.assert(TokenType::LBRACE);
-
+        let actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        if modifiers.contains(&actual.kind){
+            self.parse_class_var_dec();
+        }
         self.assert(TokenType::RBRACE);
         self.assert(TokenType::EOF);
         self.close_tag("class");
+        Ok(())
     }
     fn parse_class_var_dec(&mut self) ->Result<(), ParserError>{
         self.open_tag("classVarDec");
         let modifiers = [TokenType::STATIC, TokenType::FIELD];
         let actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
         if modifiers.contains(&actual.kind) {
-        } else {
             if actual.kind == TokenType::STATIC {
                 self.assert(TokenType::STATIC);
-                //self.parse_type()
+                self.parse_type();
+                self.parse_var_name();
+                self.assert(TokenType::SEMICOLON);
+
             }
+            else if actual.kind == TokenType::FIELD {
+                self.assert(TokenType::FIELD);
+                self.parse_type();
+                self.parse_var_name();
+                self.assert(TokenType::SEMICOLON);
+
+            }
+        } else {
+            
         }
         self.close_tag("classVarDec");
         Ok(())   
+    }
+    fn parse_type(&mut self) -> Result<(), ParserError>{
+        let types = [TokenType::INT, TokenType::STRING, TokenType::BOOLEAN];
+        let actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        if types.contains(&actual.kind){
+            if actual.kind == TokenType::INT{
+                self.assert(TokenType::INT);
+            } else if actual.kind == TokenType::STRING{
+                self.assert(TokenType::STRING);
+            } else if actual.kind == TokenType::BOOLEAN{
+                self.assert(TokenType::BOOLEAN);
+            }  
+        } else {
+            self.parse_class_name();
+        }
+        
+        Ok(())
+    }
+    fn parse_class_name(&mut self) -> Result<(), ParserError>{
+        self.assert(TokenType::IDENT);
+        
+        Ok(())
+    }
+    fn parse_var_name(&mut self) -> Result<(), ParserError>{
+        self.assert(TokenType::IDENT);
+        
+        Ok(())
     }
 }
