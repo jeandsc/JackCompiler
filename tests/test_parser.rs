@@ -1196,4 +1196,147 @@ fn test_parse_statements_empty() {
 </statements>"#;
     assert_eq!(parser.get_xml(), expected);
 }
+
+#[test]
+fn test_parse_statements_nested_if_while() {
+    let tokens = vec![
+        // if (x > 0) {
+        Token { kind: TokenType::IF, lexeme: "if".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "x".to_string(), line: 1 },
+        Token { kind: TokenType::GT, lexeme: ">".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "0".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 1 },
+        //   let y = 1;
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 2 },
+        Token { kind: TokenType::IDENT, lexeme: "y".to_string(), line: 2 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 2 },
+        Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 2 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 2 },
+        //   while (y < 10) {
+        Token { kind: TokenType::WHILE, lexeme: "while".to_string(), line: 3 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 3 },
+        Token { kind: TokenType::IDENT, lexeme: "y".to_string(), line: 3 },
+        Token { kind: TokenType::LT, lexeme: "<".to_string(), line: 3 },
+        Token { kind: TokenType::NUMBER, lexeme: "10".to_string(), line: 3 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 3 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 3 },
+        //       let y = y + 1;
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 4 },
+        Token { kind: TokenType::IDENT, lexeme: "y".to_string(), line: 4 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 4 },
+        Token { kind: TokenType::IDENT, lexeme: "y".to_string(), line: 4 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 4 },
+        Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 4 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 4 },
+        //     }
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 5 },
+        //   }
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 6 },
+        // } else {
+        Token { kind: TokenType::ELSE, lexeme: "else".to_string(), line: 7 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 7 },
+        //   do foo();
+        Token { kind: TokenType::DO, lexeme: "do".to_string(), line: 8 },
+        Token { kind: TokenType::IDENT, lexeme: "foo".to_string(), line: 8 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 8 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 8 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 8 },
+        // }
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 9 },
+        // return;
+        Token { kind: TokenType::RETURN, lexeme: "return".to_string(), line: 10 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 10 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 11 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_statements().unwrap();
+
+    let expected = r#"<statements>
+  <ifStatement>
+    <keyword> if </keyword>
+    <symbol> ( </symbol>
+    <expression>
+      <term>
+        <identifier> x </identifier>
+      </term>
+      <symbol> &gt; </symbol>
+      <term>
+        <integerConstant> 0 </integerConstant>
+      </term>
+    </expression>
+    <symbol> ) </symbol>
+    <symbol> { </symbol>
+    <statements>
+      <letStatement>
+        <keyword> let </keyword>
+        <identifier> y </identifier>
+        <symbol> = </symbol>
+        <expression>
+          <term>
+            <integerConstant> 1 </integerConstant>
+          </term>
+        </expression>
+        <symbol> ; </symbol>
+      </letStatement>
+      <whileStatement>
+        <keyword> while </keyword>
+        <symbol> ( </symbol>
+        <expression>
+          <term>
+            <identifier> y </identifier>
+          </term>
+          <symbol> &lt; </symbol>
+          <term>
+            <integerConstant> 10 </integerConstant>
+          </term>
+        </expression>
+        <symbol> ) </symbol>
+        <symbol> { </symbol>
+        <statements>
+          <letStatement>
+            <keyword> let </keyword>
+            <identifier> y </identifier>
+            <symbol> = </symbol>
+            <expression>
+              <term>
+                <identifier> y </identifier>
+              </term>
+              <symbol> + </symbol>
+              <term>
+                <integerConstant> 1 </integerConstant>
+              </term>
+            </expression>
+            <symbol> ; </symbol>
+          </letStatement>
+        </statements>
+        <symbol> } </symbol>
+      </whileStatement>
+    </statements>
+    <symbol> } </symbol>
+    <keyword> else </keyword>
+    <symbol> { </symbol>
+    <statements>
+      <doStatement>
+        <keyword> do </keyword>
+        <identifier> foo </identifier>
+        <symbol> ( </symbol>
+        <expressionList>
+        </expressionList>
+        <symbol> ) </symbol>
+        <symbol> ; </symbol>
+      </doStatement>
+    </statements>
+    <symbol> } </symbol>
+  </ifStatement>
+  <returnStatement>
+    <keyword> return </keyword>
+    <symbol> ; </symbol>
+  </returnStatement>
+</statements>"#;
+
+    assert_eq!(parser.get_xml(), expected);
+}
+
 }
