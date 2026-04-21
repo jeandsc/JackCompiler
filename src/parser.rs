@@ -71,7 +71,7 @@ impl Parser {
                 self.write_tag(&token);
                 self.advance();
             } else {
-                panic!("SyntaxError: Esperava {} e encontrou {} na linha {}", expected_type, token.kind, token.line)
+                panic!("SyntaxError: Esperava {} e encontrou {} na linha {}", expected_type, token.lexeme, token.line)
             }
 
         }
@@ -211,7 +211,11 @@ impl Parser {
                 self.assert(TokenType::LBRACKET);
                 self.parse_expression()?;
                 self.assert(TokenType::RBRACKET);
-            } 
+            } else if next1.kind == TokenType::LPAREN || next1.kind == TokenType::DOT{
+                self.parse_subroutine_call()?;
+            } else {
+                self.parse_var_name()?;
+            }
         }
         
 
@@ -263,6 +267,22 @@ impl Parser {
         Ok(())
     }
     fn parse_subroutine_call(&mut self) -> Result<(), ParserError> {
+        let next1 = self.peek(1).ok_or(ParserError::UnexpectedEOF)?;
+        if next1.kind == TokenType::LPAREN{
+                self.parse_var_name()?;
+                self.assert(TokenType::LPAREN);
+                self.parse_expression_list()?;
+                self.assert(TokenType::RPAREN);
+        }
+        if next1.kind == TokenType::DOT{
+                self.parse_class_name()?;
+                self.assert(TokenType::DOT);
+                self.parse_var_name()?;
+                self.assert(TokenType::LPAREN);
+                self.parse_expression_list()?;
+                self.assert(TokenType::RPAREN);
+
+        }
         Ok(())
     }
 }
