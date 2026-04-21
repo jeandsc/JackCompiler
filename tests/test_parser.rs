@@ -335,4 +335,100 @@ fn test_parse_expression_unary_operators() {
 
     assert_eq!(parser.get_xml(), expected);
 }
+#[test]
+fn test_parse_expression_list_empty() {
+    let tokens = vec![
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_expression_list().unwrap();
+    let expected = r#"<expressionList>
+</expressionList>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_expression_list_one() {
+    let tokens = vec![
+        Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_expression_list().unwrap();
+    let expected = r#"<expressionList>
+  <expression>
+    <term>
+      <integerConstant> 1 </integerConstant>
+    </term>
+  </expression>
+</expressionList>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_expression_list_two() {
+    let tokens = vec![
+        Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_expression_list().unwrap();
+    let expected = r#"<expressionList>
+  <expression>
+    <term>
+      <integerConstant> 1 </integerConstant>
+    </term>
+  </expression>
+  <symbol> , </symbol>
+  <expression>
+    <term>
+      <integerConstant> 2 </integerConstant>
+    </term>
+  </expression>
+</expressionList>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_expression_list_three() {
+    let tokens = vec![
+        Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 1 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "3".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "x".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_expression_list().unwrap();
+    let expected = r#"<expressionList>
+  <expression>
+    <term>
+      <integerConstant> 1 </integerConstant>
+    </term>
+  </expression>
+  <symbol> , </symbol>
+  <expression>
+    <term>
+      <integerConstant> 2 </integerConstant>
+    </term>
+    <symbol> + </symbol>
+    <term>
+      <integerConstant> 3 </integerConstant>
+    </term>
+  </expression>
+  <symbol> , </symbol>
+  <expression>
+    <term>
+      <identifier> x </identifier>
+    </term>
+  </expression>
+</expressionList>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
 }
