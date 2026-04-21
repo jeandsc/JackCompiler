@@ -3,7 +3,7 @@ use std::array;
 use crate::token::{Token, TokenType};
 
 #[derive(Debug)]
-enum ParserError {
+pub enum ParserError {
     UnexpectedEOF,
     ExpectedToken(TokenType),
     // outros...
@@ -24,6 +24,7 @@ pub struct Parser {
     ident_level:usize,
 
 }
+
 impl Parser {
     pub fn new(tokens:Vec<Token>) -> Self{
         Self { 
@@ -32,6 +33,7 @@ impl Parser {
             xml_output:  Vec::new(),
             ident_level:0}
         }
+    
     fn peek(&self, offset:usize) -> Option<Token>{
         if self.pos+offset < self.tokens.len(){
             return self.tokens.get(self.pos+offset).cloned();
@@ -155,11 +157,28 @@ impl Parser {
         
         Ok(())
     }
-    pub fn parse_term(&mut self) {
+    pub fn parse_expression(&mut self) -> Result<(), ParserError>{
+        self.open_tag("expression");
+        self.parse_term();
+        let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        let operators = [TokenType::PLUS,TokenType::MINUS,TokenType::ASTERISK,
+            TokenType::SLASH, TokenType::AND,TokenType::OR,TokenType::LT, TokenType::GT, TokenType::EQ,];
+
+        while operators.contains(&actual.kind){
+            self.assert(actual.kind);
+            self.parse_term()?;
+            actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        }
+        self.close_tag("expression");
+        Ok(())
+    }
+    pub fn parse_term(&mut self) -> Result<(), ParserError>{
         self.open_tag("term");
-        self.parse_integerConstant();
-        self.parse_stringConstant();
+        self.parse_integerConstant()?;
+        self.parse_stringConstant()?;
+        self.parse_keywordConstant()?;
         self.close_tag("term");
+        Ok(())
     }
     fn parse_integerConstant(&mut self) -> Result<(), ParserError>{
         let actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
@@ -175,4 +194,18 @@ impl Parser {
         }
         Ok(())
     }
+    fn parse_keywordConstant(&mut self) -> Result<(), ParserError>{
+        let actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        if actual.kind == TokenType::THIS{
+            self.assert(TokenType::THIS);
+        } else if actual.kind == TokenType::NULL{
+            self.assert(TokenType::NULL);
+        } else if actual.kind == TokenType::TRUE{
+            self.assert(TokenType::TRUE);
+        } else if actual.kind == TokenType::FALSE{
+            self.assert(TokenType::FALSE);
+        } 
+        Ok(())
+    }
+
 }

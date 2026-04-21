@@ -157,7 +157,7 @@ fn test_parse_term_integer_constant() {
         Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
     ];
     let mut parser = Parser::new(tokens);
-    parser.parse_term();
+    parser.parse_term().unwrap();
     let expected = r#"<term>
   <integerConstant> 123 </integerConstant>
 </term>"#;
@@ -171,7 +171,7 @@ fn test_parse_term_string_constant() {
         Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
     ];
     let mut parser = Parser::new(tokens);
-    parser.parse_term();
+    parser.parse_term().unwrap();
     let expected = r#"<term>
   <stringConstant> hello world </stringConstant>
 </term>"#;
@@ -185,10 +185,86 @@ fn test_parse_term_keyword_constant_true() {
         Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
     ];
     let mut parser = Parser::new(tokens);
-    parser.parse_term();
+    parser.parse_term().unwrap();
     let expected = r#"<term>
   <keyword> true </keyword>
 </term>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+#[test]
+fn test_parse_expression_no_parentheses() {
+    let tokens = vec![
+        Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 1 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 1 },
+        Token { kind: TokenType::ASTERISK, lexeme: "*".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "3".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_expression().unwrap();
+
+    let expected = r#"<expression>
+  <term>
+    <integerConstant> 1 </integerConstant>
+  </term>
+  <symbol> + </symbol>
+  <term>
+    <integerConstant> 2 </integerConstant>
+  </term>
+  <symbol> * </symbol>
+  <term>
+    <integerConstant> 3 </integerConstant>
+  </term>
+</expression>"#;
+
+    assert_eq!(parser.get_xml(), expected);
+}
+#[test]
+fn test_parse_expression_mixed_terms_no_parentheses() {
+    let tokens = vec![
+        Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 1 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 1 },
+        Token { kind: TokenType::STRING, lexeme: "hello".to_string(), line: 1 },
+        Token { kind: TokenType::ASTERISK, lexeme: "*".to_string(), line: 1 },
+        Token { kind: TokenType::TRUE, lexeme: "true".to_string(), line: 1 },
+        Token { kind: TokenType::MINUS, lexeme: "-".to_string(), line: 1 },
+        Token { kind: TokenType::FALSE, lexeme: "false".to_string(), line: 1 },
+        Token { kind: TokenType::SLASH, lexeme: "/".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 1 },
+        Token { kind: TokenType::AND, lexeme: "&".to_string(), line: 1 },
+        Token { kind: TokenType::NULL, lexeme: "null".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_expression().unwrap();
+
+    let expected = r#"<expression>
+  <term>
+    <integerConstant> 1 </integerConstant>
+  </term>
+  <symbol> + </symbol>
+  <term>
+    <stringConstant> hello </stringConstant>
+  </term>
+  <symbol> * </symbol>
+  <term>
+    <keyword> true </keyword>
+  </term>
+  <symbol> - </symbol>
+  <term>
+    <keyword> false </keyword>
+  </term>
+  <symbol> / </symbol>
+  <term>
+    <integerConstant> 2 </integerConstant>
+  </term>
+  <symbol> &amp; </symbol>
+  <term>
+    <keyword> null </keyword>
+  </term>
+</expression>"#;
+
     assert_eq!(parser.get_xml(), expected);
 }
 }
