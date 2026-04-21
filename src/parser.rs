@@ -163,7 +163,24 @@ impl Parser {
         Ok(())
     }
     
-    
+    pub fn parse_return_statement(&mut self) -> Result<(), ParserError>{
+        self.open_tag("returnStatement");
+        let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        if actual.kind == TokenType::RETURN{
+            self.assert(TokenType::RETURN);
+            actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+            if actual.kind == TokenType::SEMICOLON {
+                self.assert(TokenType::SEMICOLON);
+                self.close_tag("returnStatement");
+                return Ok(())
+            }
+            self.parse_expression()?;
+            self.assert(TokenType::SEMICOLON);
+            self.close_tag("returnStatement");
+        }
+        Ok(())
+
+    }
     
     
     pub fn parse_expression(&mut self) -> Result<(), ParserError>{
