@@ -166,7 +166,8 @@ impl Parser {
         self.assert(TokenType::IDENT);
         Ok(())
     }
-    fn var_dec(&mut self) -> Result<(), ParserError> {
+    pub fn parse_var_dec(&mut self) -> Result<(), ParserError> {
+        self.open_tag("varDec");
         self.assert(TokenType::VAR);
         self.parse_type()?;
         self.parse_var_name()?;
@@ -176,7 +177,8 @@ impl Parser {
             self.parse_var_name()?;
             actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
         }
-        
+        self.assert(TokenType::SEMICOLON);
+        self.close_tag("varDec");
         Ok(())
     }
 
