@@ -158,12 +158,20 @@ impl Parser {
     pub fn parse_term(&mut self) {
         self.open_tag("term");
         self.parse_integerConstant();
+        self.parse_stringConstant();
         self.close_tag("term");
     }
     fn parse_integerConstant(&mut self) -> Result<(), ParserError>{
         let actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
         if actual.kind == TokenType::NUMBER{
             self.assert(TokenType::NUMBER);
+        }
+        Ok(())
+    }
+    fn parse_stringConstant(&mut self) -> Result<(), ParserError>{
+        let actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        if actual.kind == TokenType::STRING{
+            self.assert(TokenType::STRING);
         }
         Ok(())
     }
