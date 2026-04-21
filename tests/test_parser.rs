@@ -1073,7 +1073,127 @@ fn test_parse_let_statement_array_with_expression_index() {
     assert_eq!(parser.get_xml(), expected);
 }
 
+#[test]
+fn test_parse_statements_do_let_return() {
+    let tokens = vec![
+        // doStatement: do foo();
+        Token { kind: TokenType::DO, lexeme: "do".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "foo".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        // letStatement: let x = 5;
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "x".to_string(), line: 1 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "5".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        // returnStatement: return;
+        Token { kind: TokenType::RETURN, lexeme: "return".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_statements().unwrap();
+    let expected = r#"<statements>
+  <doStatement>
+    <keyword> do </keyword>
+    <identifier> foo </identifier>
+    <symbol> ( </symbol>
+    <expressionList>
+    </expressionList>
+    <symbol> ) </symbol>
+    <symbol> ; </symbol>
+  </doStatement>
+  <letStatement>
+    <keyword> let </keyword>
+    <identifier> x </identifier>
+    <symbol> = </symbol>
+    <expression>
+      <term>
+        <integerConstant> 5 </integerConstant>
+      </term>
+    </expression>
+    <symbol> ; </symbol>
+  </letStatement>
+  <returnStatement>
+    <keyword> return </keyword>
+    <symbol> ; </symbol>
+  </returnStatement>
+</statements>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
 
+#[test]
+fn test_parse_statements_let_do_return() {
+    let tokens = vec![
+        // letStatement: let y = 10;
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "y".to_string(), line: 1 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "10".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        // doStatement: do obj.method();
+        Token { kind: TokenType::DO, lexeme: "do".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "obj".to_string(), line: 1 },
+        Token { kind: TokenType::DOT, lexeme: ".".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "method".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        // returnStatement: return 0;
+        Token { kind: TokenType::RETURN, lexeme: "return".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "0".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_statements().unwrap();
+    let expected = r#"<statements>
+  <letStatement>
+    <keyword> let </keyword>
+    <identifier> y </identifier>
+    <symbol> = </symbol>
+    <expression>
+      <term>
+        <integerConstant> 10 </integerConstant>
+      </term>
+    </expression>
+    <symbol> ; </symbol>
+  </letStatement>
+  <doStatement>
+    <keyword> do </keyword>
+    <identifier> obj </identifier>
+    <symbol> . </symbol>
+    <identifier> method </identifier>
+    <symbol> ( </symbol>
+    <expressionList>
+    </expressionList>
+    <symbol> ) </symbol>
+    <symbol> ; </symbol>
+  </doStatement>
+  <returnStatement>
+    <keyword> return </keyword>
+    <expression>
+      <term>
+        <integerConstant> 0 </integerConstant>
+      </term>
+    </expression>
+    <symbol> ; </symbol>
+  </returnStatement>
+</statements>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
 
-
+#[test]
+fn test_parse_statements_empty() {
+    let tokens = vec![
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_statements().unwrap();
+    let expected = r#"<statements>
+</statements>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
 }

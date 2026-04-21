@@ -163,6 +163,9 @@ impl Parser {
         Ok(())
     }
     
+    pub fn parse_statements(&mut self)->Result<(), ParserError>{
+        Ok(())
+    }
     pub fn parse_return_statement(&mut self) -> Result<(), ParserError>{
         self.open_tag("returnStatement");
         let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
