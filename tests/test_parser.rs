@@ -1407,4 +1407,196 @@ fn test_parse_var_dec_different_types() {
     assert_eq!(parser.get_xml(), expected);
 }
 
+#[test]
+fn test_parse_subroutine_body_evil() {
+    let tokens = vec![
+        // {
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 1 },
+        // var int i, j;
+        Token { kind: TokenType::VAR, lexeme: "var".to_string(), line: 2 },
+        Token { kind: TokenType::INT, lexeme: "int".to_string(), line: 2 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 2 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 2 },
+        Token { kind: TokenType::IDENT, lexeme: "j".to_string(), line: 2 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 2 },
+        // var String s;
+        Token { kind: TokenType::VAR, lexeme: "var".to_string(), line: 3 },
+        Token { kind: TokenType::IDENT, lexeme: "String".to_string(), line: 3 },
+        Token { kind: TokenType::IDENT, lexeme: "s".to_string(), line: 3 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 3 },
+        // var Array a, b;
+        Token { kind: TokenType::VAR, lexeme: "var".to_string(), line: 4 },
+        Token { kind: TokenType::IDENT, lexeme: "Array".to_string(), line: 4 },
+        Token { kind: TokenType::IDENT, lexeme: "a".to_string(), line: 4 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 4 },
+        Token { kind: TokenType::IDENT, lexeme: "b".to_string(), line: 4 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 4 },
+        // statements: if (i > 0) { let j = 5; } else { do foo(); }
+        Token { kind: TokenType::IF, lexeme: "if".to_string(), line: 5 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 5 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 5 },
+        Token { kind: TokenType::GT, lexeme: ">".to_string(), line: 5 },
+        Token { kind: TokenType::NUMBER, lexeme: "0".to_string(), line: 5 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 5 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 5 },
+        //   let j = 5;
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 6 },
+        Token { kind: TokenType::IDENT, lexeme: "j".to_string(), line: 6 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 6 },
+        Token { kind: TokenType::NUMBER, lexeme: "5".to_string(), line: 6 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 6 },
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 7 },
+        Token { kind: TokenType::ELSE, lexeme: "else".to_string(), line: 7 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 7 },
+        //   do foo();
+        Token { kind: TokenType::DO, lexeme: "do".to_string(), line: 8 },
+        Token { kind: TokenType::IDENT, lexeme: "foo".to_string(), line: 8 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 8 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 8 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 8 },
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 9 },
+        // while (i < 10) { let i = i + 1; }
+        Token { kind: TokenType::WHILE, lexeme: "while".to_string(), line: 10 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 10 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 10 },
+        Token { kind: TokenType::LT, lexeme: "<".to_string(), line: 10 },
+        Token { kind: TokenType::NUMBER, lexeme: "10".to_string(), line: 10 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 10 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 10 },
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 11 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 11 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 11 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 11 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 11 },
+        Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 11 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 11 },
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 12 },
+        // return s;
+        Token { kind: TokenType::RETURN, lexeme: "return".to_string(), line: 13 },
+        Token { kind: TokenType::IDENT, lexeme: "s".to_string(), line: 13 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 13 },
+        // }
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 14 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 15 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_subroutine_body().unwrap();
+
+    let expected = r#"<subroutineBody>
+  <symbol> { </symbol>
+  <varDec>
+    <keyword> var </keyword>
+    <keyword> int </keyword>
+    <identifier> i </identifier>
+    <symbol> , </symbol>
+    <identifier> j </identifier>
+    <symbol> ; </symbol>
+  </varDec>
+  <varDec>
+    <keyword> var </keyword>
+    <identifier> String </identifier>
+    <identifier> s </identifier>
+    <symbol> ; </symbol>
+  </varDec>
+  <varDec>
+    <keyword> var </keyword>
+    <identifier> Array </identifier>
+    <identifier> a </identifier>
+    <symbol> , </symbol>
+    <identifier> b </identifier>
+    <symbol> ; </symbol>
+  </varDec>
+  <statements>
+    <ifStatement>
+      <keyword> if </keyword>
+      <symbol> ( </symbol>
+      <expression>
+        <term>
+          <identifier> i </identifier>
+        </term>
+        <symbol> &gt; </symbol>
+        <term>
+          <integerConstant> 0 </integerConstant>
+        </term>
+      </expression>
+      <symbol> ) </symbol>
+      <symbol> { </symbol>
+      <statements>
+        <letStatement>
+          <keyword> let </keyword>
+          <identifier> j </identifier>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <integerConstant> 5 </integerConstant>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+      </statements>
+      <symbol> } </symbol>
+      <keyword> else </keyword>
+      <symbol> { </symbol>
+      <statements>
+        <doStatement>
+          <keyword> do </keyword>
+          <identifier> foo </identifier>
+          <symbol> ( </symbol>
+          <expressionList>
+          </expressionList>
+          <symbol> ) </symbol>
+          <symbol> ; </symbol>
+        </doStatement>
+      </statements>
+      <symbol> } </symbol>
+    </ifStatement>
+    <whileStatement>
+      <keyword> while </keyword>
+      <symbol> ( </symbol>
+      <expression>
+        <term>
+          <identifier> i </identifier>
+        </term>
+        <symbol> &lt; </symbol>
+        <term>
+          <integerConstant> 10 </integerConstant>
+        </term>
+      </expression>
+      <symbol> ) </symbol>
+      <symbol> { </symbol>
+      <statements>
+        <letStatement>
+          <keyword> let </keyword>
+          <identifier> i </identifier>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <identifier> i </identifier>
+            </term>
+            <symbol> + </symbol>
+            <term>
+              <integerConstant> 1 </integerConstant>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+      </statements>
+      <symbol> } </symbol>
+    </whileStatement>
+    <returnStatement>
+      <keyword> return </keyword>
+      <expression>
+        <term>
+          <identifier> s </identifier>
+        </term>
+      </expression>
+      <symbol> ; </symbol>
+    </returnStatement>
+  </statements>
+  <symbol> } </symbol>
+</subroutineBody>"#;
+
+    assert_eq!(parser.get_xml(), expected);
+}
+
 }
