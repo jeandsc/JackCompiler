@@ -2061,4 +2061,399 @@ fn test_parse_subroutine_dec_method_void_no_params_complex_body() {
     assert_eq!(parser.get_xml(), expected);
 }
 
+#[test]
+fn test_parse_class_main() {
+    let tokens = vec![
+        // class Main {
+        Token { kind: TokenType::CLASS, lexeme: "class".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "Main".to_string(), line: 1 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 1 },
+        // static boolean test;
+        Token { kind: TokenType::STATIC, lexeme: "static".to_string(), line: 2 },
+        Token { kind: TokenType::BOOLEAN, lexeme: "boolean".to_string(), line: 2 },
+        Token { kind: TokenType::IDENT, lexeme: "test".to_string(), line: 2 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 2 },
+        // function void main() { ... }
+        Token { kind: TokenType::FUNCTION, lexeme: "function".to_string(), line: 3 },
+        Token { kind: TokenType::VOID, lexeme: "void".to_string(), line: 3 },
+        Token { kind: TokenType::IDENT, lexeme: "main".to_string(), line: 3 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 3 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 3 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 3 },
+        // var SquareGame game;
+        Token { kind: TokenType::VAR, lexeme: "var".to_string(), line: 4 },
+        Token { kind: TokenType::IDENT, lexeme: "SquareGame".to_string(), line: 4 },
+        Token { kind: TokenType::IDENT, lexeme: "game".to_string(), line: 4 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 4 },
+        // let game = SquareGame.new();
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 5 },
+        Token { kind: TokenType::IDENT, lexeme: "game".to_string(), line: 5 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 5 },
+        Token { kind: TokenType::IDENT, lexeme: "SquareGame".to_string(), line: 5 },
+        Token { kind: TokenType::DOT, lexeme: ".".to_string(), line: 5 },
+        Token { kind: TokenType::IDENT, lexeme: "new".to_string(), line: 5 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 5 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 5 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 5 },
+        // do game.run();
+        Token { kind: TokenType::DO, lexeme: "do".to_string(), line: 6 },
+        Token { kind: TokenType::IDENT, lexeme: "game".to_string(), line: 6 },
+        Token { kind: TokenType::DOT, lexeme: ".".to_string(), line: 6 },
+        Token { kind: TokenType::IDENT, lexeme: "run".to_string(), line: 6 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 6 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 6 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 6 },
+        // do game.dispose();
+        Token { kind: TokenType::DO, lexeme: "do".to_string(), line: 7 },
+        Token { kind: TokenType::IDENT, lexeme: "game".to_string(), line: 7 },
+        Token { kind: TokenType::DOT, lexeme: ".".to_string(), line: 7 },
+        Token { kind: TokenType::IDENT, lexeme: "dispose".to_string(), line: 7 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 7 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 7 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 7 },
+        // return;
+        Token { kind: TokenType::RETURN, lexeme: "return".to_string(), line: 8 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 8 },
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 9 },
+        // function void more() { ... }
+        Token { kind: TokenType::FUNCTION, lexeme: "function".to_string(), line: 10 },
+        Token { kind: TokenType::VOID, lexeme: "void".to_string(), line: 10 },
+        Token { kind: TokenType::IDENT, lexeme: "more".to_string(), line: 10 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 10 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 10 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 10 },
+        // var int i, j;
+        Token { kind: TokenType::VAR, lexeme: "var".to_string(), line: 11 },
+        Token { kind: TokenType::INT, lexeme: "int".to_string(), line: 11 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 11 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 11 },
+        Token { kind: TokenType::IDENT, lexeme: "j".to_string(), line: 11 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 11 },
+        // var String s;
+        Token { kind: TokenType::VAR, lexeme: "var".to_string(), line: 12 },
+        Token { kind: TokenType::IDENT, lexeme: "String".to_string(), line: 12 },
+        Token { kind: TokenType::IDENT, lexeme: "s".to_string(), line: 12 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 12 },
+        // var Array a;
+        Token { kind: TokenType::VAR, lexeme: "var".to_string(), line: 13 },
+        Token { kind: TokenType::IDENT, lexeme: "Array".to_string(), line: 13 },
+        Token { kind: TokenType::IDENT, lexeme: "a".to_string(), line: 13 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 13 },
+        // if (false) { ... } else { ... } (abreviado para o teste)
+        // O conteúdo completo do if/else pode ser simplificado ou mantido.
+        // Vou incluir o if/else completo conforme o Main.xml original
+        Token { kind: TokenType::IF, lexeme: "if".to_string(), line: 14 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 14 },
+        Token { kind: TokenType::FALSE, lexeme: "false".to_string(), line: 14 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 14 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 14 },
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 15 },
+        Token { kind: TokenType::IDENT, lexeme: "s".to_string(), line: 15 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 15 },
+        Token { kind: TokenType::STRING, lexeme: "string constant".to_string(), line: 15 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 15 },
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 16 },
+        Token { kind: TokenType::IDENT, lexeme: "s".to_string(), line: 16 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 16 },
+        Token { kind: TokenType::NULL, lexeme: "null".to_string(), line: 16 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 16 },
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 17 },
+        Token { kind: TokenType::IDENT, lexeme: "a".to_string(), line: 17 },
+        Token { kind: TokenType::LBRACKET, lexeme: "[".to_string(), line: 17 },
+        Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 17 },
+        Token { kind: TokenType::RBRACKET, lexeme: "]".to_string(), line: 17 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 17 },
+        Token { kind: TokenType::IDENT, lexeme: "a".to_string(), line: 17 },
+        Token { kind: TokenType::LBRACKET, lexeme: "[".to_string(), line: 17 },
+        Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 17 },
+        Token { kind: TokenType::RBRACKET, lexeme: "]".to_string(), line: 17 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 17 },
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 18 },
+        Token { kind: TokenType::ELSE, lexeme: "else".to_string(), line: 18 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 18 },
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 19 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 19 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 19 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 19 },
+        Token { kind: TokenType::ASTERISK, lexeme: "*".to_string(), line: 19 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 19 },
+        Token { kind: TokenType::MINUS, lexeme: "-".to_string(), line: 19 },
+        Token { kind: TokenType::IDENT, lexeme: "j".to_string(), line: 19 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 19 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 19 },
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 20 },
+        Token { kind: TokenType::IDENT, lexeme: "j".to_string(), line: 20 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 20 },
+        Token { kind: TokenType::IDENT, lexeme: "j".to_string(), line: 20 },
+        Token { kind: TokenType::SLASH, lexeme: "/".to_string(), line: 20 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 20 },
+        Token { kind: TokenType::MINUS, lexeme: "-".to_string(), line: 20 },
+        Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 20 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 20 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 20 },
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 21 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 21 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 21 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 21 },
+        Token { kind: TokenType::OR, lexeme: "|".to_string(), line: 21 },
+        Token { kind: TokenType::IDENT, lexeme: "j".to_string(), line: 21 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 21 },
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 22 },
+        Token { kind: TokenType::RETURN, lexeme: "return".to_string(), line: 23 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 23 },
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 24 },
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 25 }, // class closing brace
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 26 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_class().unwrap();
+
+    let expected = r#"<class>
+  <keyword> class </keyword>
+  <identifier> Main </identifier>
+  <symbol> { </symbol>
+  <classVarDec>
+    <keyword> static </keyword>
+    <keyword> boolean </keyword>
+    <identifier> test </identifier>
+    <symbol> ; </symbol>
+  </classVarDec>
+  <subroutineDec>
+    <keyword> function </keyword>
+    <keyword> void </keyword>
+    <identifier> main </identifier>
+    <symbol> ( </symbol>
+    <parameterList>
+    </parameterList>
+    <symbol> ) </symbol>
+    <subroutineBody>
+      <symbol> { </symbol>
+      <varDec>
+        <keyword> var </keyword>
+        <identifier> SquareGame </identifier>
+        <identifier> game </identifier>
+        <symbol> ; </symbol>
+      </varDec>
+      <statements>
+        <letStatement>
+          <keyword> let </keyword>
+          <identifier> game </identifier>
+          <symbol> = </symbol>
+          <expression>
+            <term>
+              <identifier> SquareGame </identifier>
+              <symbol> . </symbol>
+              <identifier> new </identifier>
+              <symbol> ( </symbol>
+              <expressionList>
+              </expressionList>
+              <symbol> ) </symbol>
+            </term>
+          </expression>
+          <symbol> ; </symbol>
+        </letStatement>
+        <doStatement>
+          <keyword> do </keyword>
+          <identifier> game </identifier>
+          <symbol> . </symbol>
+          <identifier> run </identifier>
+          <symbol> ( </symbol>
+          <expressionList>
+          </expressionList>
+          <symbol> ) </symbol>
+          <symbol> ; </symbol>
+        </doStatement>
+        <doStatement>
+          <keyword> do </keyword>
+          <identifier> game </identifier>
+          <symbol> . </symbol>
+          <identifier> dispose </identifier>
+          <symbol> ( </symbol>
+          <expressionList>
+          </expressionList>
+          <symbol> ) </symbol>
+          <symbol> ; </symbol>
+        </doStatement>
+        <returnStatement>
+          <keyword> return </keyword>
+          <symbol> ; </symbol>
+        </returnStatement>
+      </statements>
+      <symbol> } </symbol>
+    </subroutineBody>
+  </subroutineDec>
+  <subroutineDec>
+    <keyword> function </keyword>
+    <keyword> void </keyword>
+    <identifier> more </identifier>
+    <symbol> ( </symbol>
+    <parameterList>
+    </parameterList>
+    <symbol> ) </symbol>
+    <subroutineBody>
+      <symbol> { </symbol>
+      <varDec>
+        <keyword> var </keyword>
+        <keyword> int </keyword>
+        <identifier> i </identifier>
+        <symbol> , </symbol>
+        <identifier> j </identifier>
+        <symbol> ; </symbol>
+      </varDec>
+      <varDec>
+        <keyword> var </keyword>
+        <identifier> String </identifier>
+        <identifier> s </identifier>
+        <symbol> ; </symbol>
+      </varDec>
+      <varDec>
+        <keyword> var </keyword>
+        <identifier> Array </identifier>
+        <identifier> a </identifier>
+        <symbol> ; </symbol>
+      </varDec>
+      <statements>
+        <ifStatement>
+          <keyword> if </keyword>
+          <symbol> ( </symbol>
+          <expression>
+            <term>
+              <keyword> false </keyword>
+            </term>
+          </expression>
+          <symbol> ) </symbol>
+          <symbol> { </symbol>
+          <statements>
+            <letStatement>
+              <keyword> let </keyword>
+              <identifier> s </identifier>
+              <symbol> = </symbol>
+              <expression>
+                <term>
+                  <stringConstant> string constant </stringConstant>
+                </term>
+              </expression>
+              <symbol> ; </symbol>
+            </letStatement>
+            <letStatement>
+              <keyword> let </keyword>
+              <identifier> s </identifier>
+              <symbol> = </symbol>
+              <expression>
+                <term>
+                  <keyword> null </keyword>
+                </term>
+              </expression>
+              <symbol> ; </symbol>
+            </letStatement>
+            <letStatement>
+              <keyword> let </keyword>
+              <identifier> a </identifier>
+              <symbol> [ </symbol>
+              <expression>
+                <term>
+                  <integerConstant> 1 </integerConstant>
+                </term>
+              </expression>
+              <symbol> ] </symbol>
+              <symbol> = </symbol>
+              <expression>
+                <term>
+                  <identifier> a </identifier>
+                  <symbol> [ </symbol>
+                  <expression>
+                    <term>
+                      <integerConstant> 2 </integerConstant>
+                    </term>
+                  </expression>
+                  <symbol> ] </symbol>
+                </term>
+              </expression>
+              <symbol> ; </symbol>
+            </letStatement>
+          </statements>
+          <symbol> } </symbol>
+          <keyword> else </keyword>
+          <symbol> { </symbol>
+          <statements>
+            <letStatement>
+              <keyword> let </keyword>
+              <identifier> i </identifier>
+              <symbol> = </symbol>
+              <expression>
+                <term>
+                  <identifier> i </identifier>
+                </term>
+                <symbol> * </symbol>
+                <term>
+                  <symbol> ( </symbol>
+                  <expression>
+                    <term>
+                      <symbol> - </symbol>
+                      <term>
+                        <identifier> j </identifier>
+                      </term>
+                    </term>
+                  </expression>
+                  <symbol> ) </symbol>
+                </term>
+              </expression>
+              <symbol> ; </symbol>
+            </letStatement>
+            <letStatement>
+              <keyword> let </keyword>
+              <identifier> j </identifier>
+              <symbol> = </symbol>
+              <expression>
+                <term>
+                  <identifier> j </identifier>
+                </term>
+                <symbol> / </symbol>
+                <term>
+                  <symbol> ( </symbol>
+                  <expression>
+                    <term>
+                      <symbol> - </symbol>
+                      <term>
+                        <integerConstant> 2 </integerConstant>
+                      </term>
+                    </term>
+                  </expression>
+                  <symbol> ) </symbol>
+                </term>
+              </expression>
+              <symbol> ; </symbol>
+            </letStatement>
+            <letStatement>
+              <keyword> let </keyword>
+              <identifier> i </identifier>
+              <symbol> = </symbol>
+              <expression>
+                <term>
+                  <identifier> i </identifier>
+                </term>
+                <symbol> | </symbol>
+                <term>
+                  <identifier> j </identifier>
+                </term>
+              </expression>
+              <symbol> ; </symbol>
+            </letStatement>
+          </statements>
+          <symbol> } </symbol>
+        </ifStatement>
+        <returnStatement>
+          <keyword> return </keyword>
+          <symbol> ; </symbol>
+        </returnStatement>
+      </statements>
+      <symbol> } </symbol>
+    </subroutineBody>
+  </subroutineDec>
+  <symbol> } </symbol>
+</class>"#;
+
+    assert_eq!(parser.get_xml(), expected);
+}
+
 }

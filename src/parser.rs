@@ -84,13 +84,14 @@ impl Parser {
     }
     fn parse_class(&mut self) ->Result<(), ParserError>{
         let modifiers = [TokenType::STATIC, TokenType::FIELD];
+        let modifiers_subroutine = [TokenType::CONSTRUCTOR, TokenType::FIELD];
         self.open_tag("class");
         self.assert(TokenType::CLASS);
         self.assert(TokenType::IDENT);
         self.assert(TokenType::LBRACE);
         let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
         while modifiers.contains(&actual.kind){
-            self.parse_class_var_dec();
+            self.parse_class_var_dec()?;
             actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
         }
         self.assert(TokenType::RBRACE);
@@ -134,6 +135,7 @@ impl Parser {
             
         }
         self.close_tag("classVarDec");
+
         Ok(())   
     }
     fn parse_type(&mut self) -> Result<(), ParserError>{
