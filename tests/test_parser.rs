@@ -1681,5 +1681,384 @@ fn test_parse_parameter_list_user_type() {
     assert_eq!(parser.get_xml(), expected);
 }
 
+#[test]
+fn test_parse_subroutine_dec_constructor_no_params() {
+    let tokens = vec![
+        Token { kind: TokenType::CONSTRUCTOR, lexeme: "constructor".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "Square".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "new".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 1 },
+        Token { kind: TokenType::RETURN, lexeme: "return".to_string(), line: 2 },
+        Token { kind: TokenType::THIS, lexeme: "this".to_string(), line: 2 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 2 },
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 3 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 4 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_subroutine_dec().unwrap();
+    let expected = r#"<subroutineDec>
+  <keyword> constructor </keyword>
+  <identifier> Square </identifier>
+  <identifier> new </identifier>
+  <symbol> ( </symbol>
+  <parameterList>
+  </parameterList>
+  <symbol> ) </symbol>
+  <subroutineBody>
+    <symbol> { </symbol>
+    <statements>
+      <returnStatement>
+        <keyword> return </keyword>
+        <expression>
+          <term>
+            <keyword> this </keyword>
+          </term>
+        </expression>
+        <symbol> ; </symbol>
+      </returnStatement>
+    </statements>
+    <symbol> } </symbol>
+  </subroutineBody>
+</subroutineDec>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_subroutine_dec_function_void_with_params() {
+    let tokens = vec![
+        Token { kind: TokenType::FUNCTION, lexeme: "function".to_string(), line: 1 },
+        Token { kind: TokenType::VOID, lexeme: "void".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "main".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::INT, lexeme: "int".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "a".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        Token { kind: TokenType::INT, lexeme: "int".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "b".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 1 },
+        Token { kind: TokenType::RETURN, lexeme: "return".to_string(), line: 2 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 2 },
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 3 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 4 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_subroutine_dec().unwrap();
+    let expected = r#"<subroutineDec>
+  <keyword> function </keyword>
+  <keyword> void </keyword>
+  <identifier> main </identifier>
+  <symbol> ( </symbol>
+  <parameterList>
+    <keyword> int </keyword>
+    <identifier> a </identifier>
+    <symbol> , </symbol>
+    <keyword> int </keyword>
+    <identifier> b </identifier>
+  </parameterList>
+  <symbol> ) </symbol>
+  <subroutineBody>
+    <symbol> { </symbol>
+    <statements>
+      <returnStatement>
+        <keyword> return </keyword>
+        <symbol> ; </symbol>
+      </returnStatement>
+    </statements>
+    <symbol> } </symbol>
+  </subroutineBody>
+</subroutineDec>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_subroutine_dec_method_with_user_type_return() {
+    let tokens = vec![
+        Token { kind: TokenType::METHOD, lexeme: "method".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "Square".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "getSquare".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 1 },
+        Token { kind: TokenType::VAR, lexeme: "var".to_string(), line: 2 },
+        Token { kind: TokenType::IDENT, lexeme: "Square".to_string(), line: 2 },
+        Token { kind: TokenType::IDENT, lexeme: "s".to_string(), line: 2 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 2 },
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 3 },
+        Token { kind: TokenType::IDENT, lexeme: "s".to_string(), line: 3 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 3 },
+        Token { kind: TokenType::IDENT, lexeme: "Square".to_string(), line: 3 },
+        Token { kind: TokenType::DOT, lexeme: ".".to_string(), line: 3 },
+        Token { kind: TokenType::IDENT, lexeme: "new".to_string(), line: 3 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 3 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 3 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 3 },
+        Token { kind: TokenType::RETURN, lexeme: "return".to_string(), line: 4 },
+        Token { kind: TokenType::IDENT, lexeme: "s".to_string(), line: 4 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 4 },
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 5 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 6 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_subroutine_dec().unwrap();
+    let expected = r#"<subroutineDec>
+  <keyword> method </keyword>
+  <identifier> Square </identifier>
+  <identifier> getSquare </identifier>
+  <symbol> ( </symbol>
+  <parameterList>
+  </parameterList>
+  <symbol> ) </symbol>
+  <subroutineBody>
+    <symbol> { </symbol>
+    <varDec>
+      <keyword> var </keyword>
+      <identifier> Square </identifier>
+      <identifier> s </identifier>
+      <symbol> ; </symbol>
+    </varDec>
+    <statements>
+      <letStatement>
+        <keyword> let </keyword>
+        <identifier> s </identifier>
+        <symbol> = </symbol>
+        <expression>
+          <term>
+            <identifier> Square </identifier>
+            <symbol> . </symbol>
+            <identifier> new </identifier>
+            <symbol> ( </symbol>
+            <expressionList>
+            </expressionList>
+            <symbol> ) </symbol>
+          </term>
+        </expression>
+        <symbol> ; </symbol>
+      </letStatement>
+      <returnStatement>
+        <keyword> return </keyword>
+        <expression>
+          <term>
+            <identifier> s </identifier>
+          </term>
+        </expression>
+        <symbol> ; </symbol>
+      </returnStatement>
+    </statements>
+    <symbol> } </symbol>
+  </subroutineBody>
+</subroutineDec>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_subroutine_dec_function_int_with_mixed_params() {
+    let tokens = vec![
+        Token { kind: TokenType::FUNCTION, lexeme: "function".to_string(), line: 1 },
+        Token { kind: TokenType::INT, lexeme: "int".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "sum".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::INT, lexeme: "int".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "x".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "Array".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "arr".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 1 },
+        Token { kind: TokenType::VAR, lexeme: "var".to_string(), line: 2 },
+        Token { kind: TokenType::INT, lexeme: "int".to_string(), line: 2 },
+        Token { kind: TokenType::IDENT, lexeme: "total".to_string(), line: 2 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 2 },
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 3 },
+        Token { kind: TokenType::IDENT, lexeme: "total".to_string(), line: 3 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 3 },
+        Token { kind: TokenType::IDENT, lexeme: "x".to_string(), line: 3 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 3 },
+        Token { kind: TokenType::IDENT, lexeme: "arr".to_string(), line: 3 },
+        Token { kind: TokenType::LBRACKET, lexeme: "[".to_string(), line: 3 },
+        Token { kind: TokenType::NUMBER, lexeme: "0".to_string(), line: 3 },
+        Token { kind: TokenType::RBRACKET, lexeme: "]".to_string(), line: 3 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 3 },
+        Token { kind: TokenType::RETURN, lexeme: "return".to_string(), line: 4 },
+        Token { kind: TokenType::IDENT, lexeme: "total".to_string(), line: 4 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 4 },
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 5 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 6 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_subroutine_dec().unwrap();
+    let expected = r#"<subroutineDec>
+  <keyword> function </keyword>
+  <keyword> int </keyword>
+  <identifier> sum </identifier>
+  <symbol> ( </symbol>
+  <parameterList>
+    <keyword> int </keyword>
+    <identifier> x </identifier>
+    <symbol> , </symbol>
+    <identifier> Array </identifier>
+    <identifier> arr </identifier>
+  </parameterList>
+  <symbol> ) </symbol>
+  <subroutineBody>
+    <symbol> { </symbol>
+    <varDec>
+      <keyword> var </keyword>
+      <keyword> int </keyword>
+      <identifier> total </identifier>
+      <symbol> ; </symbol>
+    </varDec>
+    <statements>
+      <letStatement>
+        <keyword> let </keyword>
+        <identifier> total </identifier>
+        <symbol> = </symbol>
+        <expression>
+          <term>
+            <identifier> x </identifier>
+          </term>
+          <symbol> + </symbol>
+          <term>
+            <identifier> arr </identifier>
+            <symbol> [ </symbol>
+            <expression>
+              <term>
+                <integerConstant> 0 </integerConstant>
+              </term>
+            </expression>
+            <symbol> ] </symbol>
+          </term>
+        </expression>
+        <symbol> ; </symbol>
+      </letStatement>
+      <returnStatement>
+        <keyword> return </keyword>
+        <expression>
+          <term>
+            <identifier> total </identifier>
+          </term>
+        </expression>
+        <symbol> ; </symbol>
+      </returnStatement>
+    </statements>
+    <symbol> } </symbol>
+  </subroutineBody>
+</subroutineDec>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_subroutine_dec_method_void_no_params_complex_body() {
+    let tokens = vec![
+        Token { kind: TokenType::METHOD, lexeme: "method".to_string(), line: 1 },
+        Token { kind: TokenType::VOID, lexeme: "void".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "update".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 1 },
+        Token { kind: TokenType::VAR, lexeme: "var".to_string(), line: 2 },
+        Token { kind: TokenType::INT, lexeme: "int".to_string(), line: 2 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 2 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 2 },
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 3 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 3 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 3 },
+        Token { kind: TokenType::NUMBER, lexeme: "0".to_string(), line: 3 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 3 },
+        Token { kind: TokenType::WHILE, lexeme: "while".to_string(), line: 4 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 4 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 4 },
+        Token { kind: TokenType::LT, lexeme: "<".to_string(), line: 4 },
+        Token { kind: TokenType::NUMBER, lexeme: "10".to_string(), line: 4 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 4 },
+        Token { kind: TokenType::LBRACE, lexeme: "{".to_string(), line: 4 },
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 5 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 5 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 5 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 5 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 5 },
+        Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 5 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 5 },
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 6 },
+        Token { kind: TokenType::RETURN, lexeme: "return".to_string(), line: 7 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 7 },
+        Token { kind: TokenType::RBRACE, lexeme: "}".to_string(), line: 8 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 9 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_subroutine_dec().unwrap();
+    let expected = r#"<subroutineDec>
+  <keyword> method </keyword>
+  <keyword> void </keyword>
+  <identifier> update </identifier>
+  <symbol> ( </symbol>
+  <parameterList>
+  </parameterList>
+  <symbol> ) </symbol>
+  <subroutineBody>
+    <symbol> { </symbol>
+    <varDec>
+      <keyword> var </keyword>
+      <keyword> int </keyword>
+      <identifier> i </identifier>
+      <symbol> ; </symbol>
+    </varDec>
+    <statements>
+      <letStatement>
+        <keyword> let </keyword>
+        <identifier> i </identifier>
+        <symbol> = </symbol>
+        <expression>
+          <term>
+            <integerConstant> 0 </integerConstant>
+          </term>
+        </expression>
+        <symbol> ; </symbol>
+      </letStatement>
+      <whileStatement>
+        <keyword> while </keyword>
+        <symbol> ( </symbol>
+        <expression>
+          <term>
+            <identifier> i </identifier>
+          </term>
+          <symbol> &lt; </symbol>
+          <term>
+            <integerConstant> 10 </integerConstant>
+          </term>
+        </expression>
+        <symbol> ) </symbol>
+        <symbol> { </symbol>
+        <statements>
+          <letStatement>
+            <keyword> let </keyword>
+            <identifier> i </identifier>
+            <symbol> = </symbol>
+            <expression>
+              <term>
+                <identifier> i </identifier>
+              </term>
+              <symbol> + </symbol>
+              <term>
+                <integerConstant> 1 </integerConstant>
+              </term>
+            </expression>
+            <symbol> ; </symbol>
+          </letStatement>
+        </statements>
+        <symbol> } </symbol>
+      </whileStatement>
+      <returnStatement>
+        <keyword> return </keyword>
+        <symbol> ; </symbol>
+      </returnStatement>
+    </statements>
+    <symbol> } </symbol>
+  </subroutineBody>
+</subroutineDec>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
 
 }
