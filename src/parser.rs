@@ -190,7 +190,22 @@ impl Parser {
         self.close_tag("doStatement");
         Ok(())
     }
-    
+    pub  fn parse_let_statement(&mut self) -> Result<(), ParserError> {
+        self.open_tag("letStatement");
+        self.assert(TokenType::LET);
+        self.parse_var_name()?;
+        let actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        if actual.kind == TokenType::LBRACKET{
+            self.assert(TokenType::LBRACKET);
+            self.parse_expression()?;
+            self.assert(TokenType::RBRACKET);
+        }
+        self.assert(TokenType::EQ);
+        self.parse_expression()?;
+        self.assert(TokenType::SEMICOLON);
+        self.close_tag("letStatement");
+        Ok(())
+    }
     pub fn parse_expression(&mut self) -> Result<(), ParserError>{
         let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
         //println!("{}",actual.kind);

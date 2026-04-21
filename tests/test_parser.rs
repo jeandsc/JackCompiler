@@ -931,5 +931,149 @@ fn test_parse_do_statement_with_multiple_args() {
     assert_eq!(parser.get_xml(), expected);
 }
 
+#[test]
+fn test_parse_let_statement_simple() {
+    let tokens = vec![
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "x".to_string(), line: 1 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "5".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_let_statement().unwrap();
+    let expected = r#"<letStatement>
+  <keyword> let </keyword>
+  <identifier> x </identifier>
+  <symbol> = </symbol>
+  <expression>
+    <term>
+      <integerConstant> 5 </integerConstant>
+    </term>
+  </expression>
+  <symbol> ; </symbol>
+</letStatement>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_let_statement_with_array_index() {
+    let tokens = vec![
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "a".to_string(), line: 1 },
+        Token { kind: TokenType::LBRACKET, lexeme: "[".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 1 },
+        Token { kind: TokenType::RBRACKET, lexeme: "]".to_string(), line: 1 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_let_statement().unwrap();
+    let expected = r#"<letStatement>
+  <keyword> let </keyword>
+  <identifier> a </identifier>
+  <symbol> [ </symbol>
+  <expression>
+    <term>
+      <integerConstant> 1 </integerConstant>
+    </term>
+  </expression>
+  <symbol> ] </symbol>
+  <symbol> = </symbol>
+  <expression>
+    <term>
+      <integerConstant> 2 </integerConstant>
+    </term>
+  </expression>
+  <symbol> ; </symbol>
+</letStatement>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_let_statement_complex_expression() {
+    let tokens = vec![
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "x".to_string(), line: 1 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "y".to_string(), line: 1 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "3".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_let_statement().unwrap();
+    let expected = r#"<letStatement>
+  <keyword> let </keyword>
+  <identifier> x </identifier>
+  <symbol> = </symbol>
+  <expression>
+    <term>
+      <identifier> y </identifier>
+    </term>
+    <symbol> + </symbol>
+    <term>
+      <integerConstant> 3 </integerConstant>
+    </term>
+  </expression>
+  <symbol> ; </symbol>
+</letStatement>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_let_statement_array_with_expression_index() {
+    let tokens = vec![
+        Token { kind: TokenType::LET, lexeme: "let".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "arr".to_string(), line: 1 },
+        Token { kind: TokenType::LBRACKET, lexeme: "[".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 1 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 1 },
+        Token { kind: TokenType::RBRACKET, lexeme: "]".to_string(), line: 1 },
+        Token { kind: TokenType::EQ, lexeme: "=".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "j".to_string(), line: 1 },
+        Token { kind: TokenType::ASTERISK, lexeme: "*".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_let_statement().unwrap();
+    let expected = r#"<letStatement>
+  <keyword> let </keyword>
+  <identifier> arr </identifier>
+  <symbol> [ </symbol>
+  <expression>
+    <term>
+      <identifier> i </identifier>
+    </term>
+    <symbol> + </symbol>
+    <term>
+      <integerConstant> 1 </integerConstant>
+    </term>
+  </expression>
+  <symbol> ] </symbol>
+  <symbol> = </symbol>
+  <expression>
+    <term>
+      <identifier> j </identifier>
+    </term>
+    <symbol> * </symbol>
+    <term>
+      <integerConstant> 2 </integerConstant>
+    </term>
+  </expression>
+  <symbol> ; </symbol>
+</letStatement>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+
+
 
 }
