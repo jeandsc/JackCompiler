@@ -149,4 +149,46 @@ fn test_parse_class_with_robust_class_var_decs() {
     
     assert_eq!(parser.get_xml(), expected);
 }
+
+#[test]
+fn test_parse_term_integer_constant() {
+    let tokens = vec![
+        Token { kind: TokenType::NUMBER, lexeme: "123".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_term();
+    let expected = r#"<term>
+  <integerConstant> 123 </integerConstant>
+</term>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_term_string_constant() {
+    let tokens = vec![
+        Token { kind: TokenType::STRING, lexeme: "hello world".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_term();
+    let expected = r#"<term>
+  <stringConstant> hello world </stringConstant>
+</term>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_term_keyword_constant_true() {
+    let tokens = vec![
+        Token { kind: TokenType::TRUE, lexeme: "true".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_term();
+    let expected = r#"<term>
+  <keyword> true </keyword>
+</term>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
 }

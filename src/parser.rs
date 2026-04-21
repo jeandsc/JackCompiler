@@ -155,4 +155,12 @@ impl Parser {
         
         Ok(())
     }
+    pub fn parse_term(&mut self) -> Result<(), ParserError>{
+        self.parse_integerConstant();
+        Ok(())
+    }
+    fn parse_integerConstant(&mut self) -> Result<(), ParserError>{
+        let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        Ok(())
+    }
 }
