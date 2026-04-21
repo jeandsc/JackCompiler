@@ -763,5 +763,43 @@ fn test_parse_expression_complex_with_method_call() {
     assert_eq!(parser.get_xml(), expected);
 }
 
+#[test]
+fn test_parse_return_statement_no_expression() {
+    let tokens = vec![
+        Token { kind: TokenType::RETURN, lexeme: "return".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_return_statement().unwrap();
+    let expected = r#"<returnStatement>
+  <keyword> return </keyword>
+  <symbol> ; </symbol>
+</returnStatement>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_return_statement_with_expression() {
+    let tokens = vec![
+        Token { kind: TokenType::RETURN, lexeme: "return".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "42".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_return_statement().unwrap();
+    let expected = r#"<returnStatement>
+  <keyword> return </keyword>
+  <expression>
+    <term>
+      <integerConstant> 42 </integerConstant>
+    </term>
+  </expression>
+  <symbol> ; </symbol>
+</returnStatement>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
 
 }
