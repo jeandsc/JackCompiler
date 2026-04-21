@@ -1599,4 +1599,87 @@ fn test_parse_subroutine_body_evil() {
     assert_eq!(parser.get_xml(), expected);
 }
 
+#[test]
+fn test_parse_parameter_list_empty() {
+    let tokens = vec![
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 }, // apenas para parar
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_parameter_list().unwrap();
+    let expected = r#"<parameterList>
+</parameterList>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_parameter_list_one() {
+    let tokens = vec![
+        Token { kind: TokenType::INT, lexeme: "int".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "x".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 }, // stop
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_parameter_list().unwrap();
+    let expected = r#"<parameterList>
+  <keyword> int </keyword>
+  <identifier> x </identifier>
+</parameterList>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_parameter_list_multiple() {
+    let tokens = vec![
+        Token { kind: TokenType::INT, lexeme: "int".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "Ax".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        Token { kind: TokenType::INT, lexeme: "int".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "Ay".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        Token { kind: TokenType::INT, lexeme: "int".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "Asize".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_parameter_list().unwrap();
+    let expected = r#"<parameterList>
+  <keyword> int </keyword>
+  <identifier> Ax </identifier>
+  <symbol> , </symbol>
+  <keyword> int </keyword>
+  <identifier> Ay </identifier>
+  <symbol> , </symbol>
+  <keyword> int </keyword>
+  <identifier> Asize </identifier>
+</parameterList>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_parameter_list_user_type() {
+    let tokens = vec![
+        Token { kind: TokenType::IDENT, lexeme: "Square".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "s".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "SquareGame".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "game".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_parameter_list().unwrap();
+    let expected = r#"<parameterList>
+  <identifier> Square </identifier>
+  <identifier> s </identifier>
+  <symbol> , </symbol>
+  <identifier> SquareGame </identifier>
+  <identifier> game </identifier>
+</parameterList>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+
 }
