@@ -107,6 +107,12 @@ impl Parser {
                 self.assert(TokenType::STATIC);
                 self.parse_type();
                 self.parse_var_name();
+                let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+                while actual.kind == TokenType::COMMA {
+                    self.assert(TokenType::COMMA);
+                    self.parse_var_name();
+                    actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+                }
                 self.assert(TokenType::SEMICOLON);
 
             }
@@ -114,6 +120,12 @@ impl Parser {
                 self.assert(TokenType::FIELD);
                 self.parse_type();
                 self.parse_var_name();
+                let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+                while actual.kind == TokenType::COMMA {
+                    self.assert(TokenType::COMMA);
+                    self.parse_var_name();
+                    actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+                }
                 self.assert(TokenType::SEMICOLON);
 
             }
@@ -148,13 +160,6 @@ impl Parser {
     }
     fn parse_var_name(&mut self) -> Result<(), ParserError>{
         self.assert(TokenType::IDENT);
-        let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
-        while actual.kind == TokenType::COMMA {
-            self.assert(TokenType::COMMA);
-            self.assert(TokenType::IDENT);
-            actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
-        }
-        
         Ok(())
     }
     pub fn parse_expression(&mut self) -> Result<(), ParserError>{
@@ -181,7 +186,8 @@ impl Parser {
     pub fn parse_term(&mut self) -> Result<(), ParserError>{
 
         self.open_tag("term");
-        let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        let actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        let next1 = self.peek(1).ok_or(ParserError::UnexpectedEOF)?;
         let keyword_constant = [TokenType::THIS,TokenType::NULL,TokenType::TRUE,TokenType::FALSE];
         let unary_operator = [TokenType::MINUS, TokenType::NOT];
         if actual.kind == TokenType::NUMBER {
@@ -199,13 +205,13 @@ impl Parser {
             self.parse_unary()?;
             self.parse_term()?;
         } else if actual.kind == TokenType::IDENT {
-            let next1 = self.peek(1).ok_or(ParserError::UnexpectedEOF)?;
+            
             if next1.kind == TokenType::LBRACKET{
                 self.parse_var_name()?;
                 self.assert(TokenType::LBRACKET);
                 self.parse_expression()?;
                 self.assert(TokenType::RBRACKET);
-            }
+            } 
         }
         
 
@@ -254,6 +260,9 @@ impl Parser {
             actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;     
         }
         self.close_tag("expressionList");
+        Ok(())
+    }
+    fn parse_subroutine_call(&mut self) -> Result<(), ParserError> {
         Ok(())
     }
 }

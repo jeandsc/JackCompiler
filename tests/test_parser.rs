@@ -494,4 +494,274 @@ fn test_parse_term_array_indexing_simple() {
 </term>"#;
     assert_eq!(parser.get_xml(), expected);
 }
+
+#[test]
+fn test_parse_term_array_indexing_expression() {
+    let tokens = vec![
+        Token { kind: TokenType::IDENT, lexeme: "b".to_string(), line: 1 },
+        Token { kind: TokenType::LBRACKET, lexeme: "[".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 1 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "3".to_string(), line: 1 },
+        Token { kind: TokenType::RBRACKET, lexeme: "]".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_term().unwrap();
+    let expected = r#"<term>
+  <identifier> b </identifier>
+  <symbol> [ </symbol>
+  <expression>
+    <term>
+      <integerConstant> 2 </integerConstant>
+    </term>
+    <symbol> + </symbol>
+    <term>
+      <integerConstant> 3 </integerConstant>
+    </term>
+  </expression>
+  <symbol> ] </symbol>
+</term>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_expression_complex_with_arrays() {
+    let tokens = vec![
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "a".to_string(), line: 1 },
+        Token { kind: TokenType::LBRACKET, lexeme: "[".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 1 },
+        Token { kind: TokenType::RBRACKET, lexeme: "]".to_string(), line: 1 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "3".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::ASTERISK, lexeme: "*".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "b".to_string(), line: 1 },
+        Token { kind: TokenType::LBRACKET, lexeme: "[".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "0".to_string(), line: 1 },
+        Token { kind: TokenType::RBRACKET, lexeme: "]".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_expression().unwrap();
+    let expected = r#"<expression>
+  <term>
+    <symbol> ( </symbol>
+    <expression>
+      <term>
+        <identifier> a </identifier>
+        <symbol> [ </symbol>
+        <expression>
+          <term>
+            <integerConstant> 2 </integerConstant>
+          </term>
+        </expression>
+        <symbol> ] </symbol>
+      </term>
+      <symbol> + </symbol>
+      <term>
+        <integerConstant> 3 </integerConstant>
+      </term>
+    </expression>
+    <symbol> ) </symbol>
+  </term>
+  <symbol> * </symbol>
+  <term>
+    <identifier> b </identifier>
+    <symbol> [ </symbol>
+    <expression>
+      <term>
+        <integerConstant> 0 </integerConstant>
+      </term>
+    </expression>
+    <symbol> ] </symbol>
+  </term>
+</expression>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_term_subroutine_call_no_args() {
+    let tokens = vec![
+        Token { kind: TokenType::IDENT, lexeme: "foo".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_term().unwrap();
+    let expected = r#"<term>
+  <identifier> foo </identifier>
+  <symbol> ( </symbol>
+  <expressionList>
+  </expressionList>
+  <symbol> ) </symbol>
+</term>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_term_subroutine_call_with_args() {
+    let tokens = vec![
+        Token { kind: TokenType::IDENT, lexeme: "foo".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "x".to_string(), line: 1 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        Token { kind: TokenType::STRING, lexeme: "hello".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_term().unwrap();
+    let expected = r#"<term>
+  <identifier> foo </identifier>
+  <symbol> ( </symbol>
+  <expressionList>
+    <expression>
+      <term>
+        <integerConstant> 1 </integerConstant>
+      </term>
+    </expression>
+    <symbol> , </symbol>
+    <expression>
+      <term>
+        <identifier> x </identifier>
+      </term>
+      <symbol> + </symbol>
+      <term>
+        <integerConstant> 2 </integerConstant>
+      </term>
+    </expression>
+    <symbol> , </symbol>
+    <expression>
+      <term>
+        <stringConstant> hello </stringConstant>
+      </term>
+    </expression>
+  </expressionList>
+  <symbol> ) </symbol>
+</term>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_term_method_call_no_args() {
+    let tokens = vec![
+        Token { kind: TokenType::IDENT, lexeme: "obj".to_string(), line: 1 },
+        Token { kind: TokenType::DOT, lexeme: ".".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "method".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_term().unwrap();
+    let expected = r#"<term>
+  <identifier> obj </identifier>
+  <symbol> . </symbol>
+  <identifier> method </identifier>
+  <symbol> ( </symbol>
+  <expressionList>
+  </expressionList>
+  <symbol> ) </symbol>
+</term>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_term_method_call_with_args() {
+    let tokens = vec![
+        Token { kind: TokenType::IDENT, lexeme: "obj".to_string(), line: 1 },
+        Token { kind: TokenType::DOT, lexeme: ".".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "method".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "3".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "y".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_term().unwrap();
+    let expected = r#"<term>
+  <identifier> obj </identifier>
+  <symbol> . </symbol>
+  <identifier> method </identifier>
+  <symbol> ( </symbol>
+  <expressionList>
+    <expression>
+      <term>
+        <integerConstant> 3 </integerConstant>
+      </term>
+    </expression>
+    <symbol> , </symbol>
+    <expression>
+      <term>
+        <identifier> y </identifier>
+      </term>
+    </expression>
+  </expressionList>
+  <symbol> ) </symbol>
+</term>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_expression_complex_with_method_call() {
+    let tokens = vec![
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "obj".to_string(), line: 1 },
+        Token { kind: TokenType::DOT, lexeme: ".".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "method".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "3".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::ASTERISK, lexeme: "*".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "4".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_expression().unwrap();
+    let expected = r#"<expression>
+  <term>
+    <symbol> ( </symbol>
+    <expression>
+      <term>
+        <identifier> obj </identifier>
+        <symbol> . </symbol>
+        <identifier> method </identifier>
+        <symbol> ( </symbol>
+        <expressionList>
+          <expression>
+            <term>
+              <integerConstant> 2 </integerConstant>
+            </term>
+          </expression>
+        </expressionList>
+        <symbol> ) </symbol>
+      </term>
+      <symbol> + </symbol>
+      <term>
+        <integerConstant> 3 </integerConstant>
+      </term>
+    </expression>
+    <symbol> ) </symbol>
+  </term>
+  <symbol> * </symbol>
+  <term>
+    <integerConstant> 4 </integerConstant>
+  </term>
+</expression>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+
 }
