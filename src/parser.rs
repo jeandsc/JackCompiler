@@ -158,9 +158,17 @@ impl Parser {
         Ok(())
     }
     pub fn parse_expression(&mut self) -> Result<(), ParserError>{
-        self.open_tag("expression");
-        self.parse_term();
         let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        let mut lparen = false;
+        if actual.kind == TokenType::LPAREN {
+            self.assert(TokenType::LPAREN);
+            lparen = true;
+        }
+        self.open_tag("expression");
+        
+        
+        self.parse_term();
+        
         let operators = [TokenType::PLUS,TokenType::MINUS,TokenType::ASTERISK,
             TokenType::SLASH, TokenType::AND,TokenType::OR,TokenType::LT, TokenType::GT, TokenType::EQ,];
 
@@ -170,6 +178,9 @@ impl Parser {
             actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
         }
         self.close_tag("expression");
+        if lparen {
+            self.assert(TokenType::RPAREN);
+        }
         Ok(())
     }
     pub fn parse_term(&mut self) -> Result<(), ParserError>{
@@ -177,6 +188,7 @@ impl Parser {
         self.parse_integerConstant()?;
         self.parse_stringConstant()?;
         self.parse_keywordConstant()?;
+        self.parse_expression()?;
         self.close_tag("term");
         Ok(())
     }
@@ -207,5 +219,5 @@ impl Parser {
         } 
         Ok(())
     }
-
+    
 }

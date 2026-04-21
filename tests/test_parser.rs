@@ -267,4 +267,41 @@ fn test_parse_expression_mixed_terms_no_parentheses() {
 
     assert_eq!(parser.get_xml(), expected);
 }
+#[test]
+fn test_parse_expression_with_parentheses() {
+    let tokens = vec![
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::TRUE, lexeme: "true".to_string(), line: 1 },
+        Token { kind: TokenType::AND, lexeme: "&".to_string(), line: 1 },
+        Token { kind: TokenType::FALSE, lexeme: "false".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::OR, lexeme: "|".to_string(), line: 1 },
+        Token { kind: TokenType::STRING, lexeme: "hello".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_expression().unwrap();
+
+    let expected = r#"<expression>
+  <term>
+    <symbol> ( </symbol>
+    <expression>
+      <term>
+        <keyword> true </keyword>
+      </term>
+      <symbol> &amp; </symbol>
+      <term>
+        <keyword> false </keyword>
+      </term>
+    </expression>
+    <symbol> ) </symbol>
+  </term>
+  <symbol> | </symbol>
+  <term>
+    <stringConstant> hello </stringConstant>
+  </term>
+</expression>"#;
+
+    assert_eq!(parser.get_xml(), expected);
+}
 }
