@@ -182,6 +182,20 @@ impl Parser {
         Ok(())
     }
 
+    pub fn parse_subroutine_body (&mut self) -> Result<(), ParserError> {
+        self.open_tag("subroutineBody");
+        self.assert(TokenType::LBRACE);
+        let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        while actual.kind == TokenType::VAR {
+            self.parse_var_dec()?;
+            actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;         
+        }
+        self.parse_statements()?;
+        self.assert(TokenType::RBRACE);
+        self.close_tag("subroutineBody");
+        Ok(())
+    }
+
     pub fn parse_statements(&mut self)->Result<(), ParserError>{
         let statements_keywords = [TokenType::LET,TokenType::DO, TokenType::RETURN, TokenType::IF, TokenType::WHILE];
         let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
