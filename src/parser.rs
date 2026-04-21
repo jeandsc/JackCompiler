@@ -174,6 +174,10 @@ impl Parser {
                 self.parse_do_statement()?;
             } else if actual.kind == TokenType::RETURN {
                 self.parse_return_statement()?;
+            } else if actual.kind == TokenType::IF {
+                self.parse_if_statement()?;
+            } else if actual.kind == TokenType::WHILE {
+                self.parse_while_statement()?;
             }
             actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
         }
@@ -221,6 +225,39 @@ impl Parser {
         self.parse_expression()?;
         self.assert(TokenType::SEMICOLON);
         self.close_tag("letStatement");
+        Ok(())
+    }
+
+    pub fn parse_if_statement(&mut self) -> Result<(), ParserError>{
+        self.open_tag("ifStatement");
+        self.assert(TokenType::IF);
+        self.assert(TokenType::LPAREN);
+        self.parse_expression()?;
+        self.assert(TokenType::RPAREN);
+        self.assert(TokenType::LBRACE);
+        self.parse_statements()?;
+        self.assert(TokenType::RBRACE);
+        let actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        if actual.kind == TokenType::ELSE{
+            self.assert(TokenType::ELSE);
+            self.assert(TokenType::LBRACE);
+            self.parse_statements()?;
+            self.assert(TokenType::RBRACE);
+
+        }
+        self.close_tag("ifStatement");
+        Ok(())
+    }
+    pub fn parse_while_statement(&mut self) -> Result<(), ParserError>{
+        self.open_tag("whileStatement");
+        self.assert(TokenType::WHILE);
+        self.assert(TokenType::LPAREN);
+        self.parse_expression()?;
+        self.assert(TokenType::RPAREN);
+        self.assert(TokenType::LBRACE);
+        self.parse_statements()?;
+        self.assert(TokenType::RBRACE);
+        self.close_tag("whileStatement");
         Ok(())
     }
     pub fn parse_expression(&mut self) -> Result<(), ParserError>{
