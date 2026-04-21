@@ -164,6 +164,20 @@ impl Parser {
     }
     
     pub fn parse_statements(&mut self)->Result<(), ParserError>{
+        let statements_keywords = [TokenType::LET,TokenType::DO, TokenType::RETURN, TokenType::IF, TokenType::WHILE];
+        let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        self.open_tag("statements");
+        while statements_keywords.contains(&actual.kind){
+            if actual.kind == TokenType::LET {
+                self.parse_let_statement()?;
+            } else if actual.kind == TokenType::DO {
+                self.parse_do_statement()?;
+            } else if actual.kind == TokenType::RETURN {
+                self.parse_return_statement()?;
+            }
+            actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        }
+        self.close_tag("statements");
         Ok(())
     }
     pub fn parse_return_statement(&mut self) -> Result<(), ParserError>{
