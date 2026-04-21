@@ -304,4 +304,35 @@ fn test_parse_expression_with_parentheses() {
 
     assert_eq!(parser.get_xml(), expected);
 }
+#[test]
+fn test_parse_expression_unary_operators() {
+    let tokens = vec![
+        Token { kind: TokenType::MINUS, lexeme: "-".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "5".to_string(), line: 1 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 1 },
+        Token { kind: TokenType::NOT, lexeme: "~".to_string(), line: 1 },
+        Token { kind: TokenType::TRUE, lexeme: "true".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_expression().unwrap();
+
+    let expected = r#"<expression>
+  <term>
+    <unaryOp> - </unaryOp>
+    <term>
+      <integerConstant> 5 </integerConstant>
+    </term>
+  </term>
+  <symbol> + </symbol>
+  <term>
+    <unaryOp> ~ </unaryOp>
+    <term>
+      <keyword> true </keyword>
+    </term>
+  </term>
+</expression>"#;
+
+    assert_eq!(parser.get_xml(), expected);
+}
 }
