@@ -183,6 +183,7 @@ impl Parser {
         self.open_tag("term");
         let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
         let keyword_constant = [TokenType::THIS,TokenType::NULL,TokenType::TRUE,TokenType::FALSE];
+        let unary_operator = [TokenType::MINUS, TokenType::NOT];
         if actual.kind == TokenType::NUMBER {
             self.assert(TokenType::NUMBER);
         } else if actual.kind == TokenType::STRING {
@@ -194,6 +195,9 @@ impl Parser {
             self.parse_expression()?;
             self.assert(TokenType::RPAREN);
             
+        } else if unary_operator.contains(&actual.kind){
+            self.parse_unary();
+            self.parse_term();
         }
         
 
@@ -217,5 +221,14 @@ impl Parser {
         
         Ok(())
     }
-    
+    fn parse_unary(&mut self)-> Result<(), ParserError>{
+        let actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        if actual.kind == TokenType::NOT{
+            self.assert(TokenType::NOT);
+        } else if actual.kind == TokenType::MINUS{
+            self.assert(TokenType::MINUS);
+        }
+        Ok(())
+        
+    }
 }

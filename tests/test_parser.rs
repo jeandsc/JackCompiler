@@ -319,14 +319,14 @@ fn test_parse_expression_unary_operators() {
 
     let expected = r#"<expression>
   <term>
-    <unaryOp> - </unaryOp>
+    <symbol> - </symbol>
     <term>
       <integerConstant> 5 </integerConstant>
     </term>
   </term>
   <symbol> + </symbol>
   <term>
-    <unaryOp> ~ </unaryOp>
+    <symbol> ~ </symbol>
     <term>
       <keyword> true </keyword>
     </term>
