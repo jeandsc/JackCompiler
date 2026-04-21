@@ -470,4 +470,28 @@ fn test_parse_expression_list_complex_no_varname_no_outer_parens() {
 
     assert_eq!(parser.get_xml(), expected);
 }
+
+#[test]
+fn test_parse_term_array_indexing_simple() {
+    let tokens = vec![
+        Token { kind: TokenType::IDENT, lexeme: "a".to_string(), line: 1 },
+        Token { kind: TokenType::LBRACKET, lexeme: "[".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 1 },
+        Token { kind: TokenType::RBRACKET, lexeme: "]".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_term().unwrap();
+    let expected = r#"<term>
+  <identifier> a </identifier>
+  <symbol> [ </symbol>
+  <expression>
+    <term>
+      <integerConstant> 1 </integerConstant>
+    </term>
+  </expression>
+  <symbol> ] </symbol>
+</term>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
 }

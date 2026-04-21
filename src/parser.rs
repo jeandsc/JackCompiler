@@ -196,8 +196,16 @@ impl Parser {
             self.assert(TokenType::RPAREN);
             
         } else if unary_operator.contains(&actual.kind){
-            self.parse_unary();
-            self.parse_term();
+            self.parse_unary()?;
+            self.parse_term()?;
+        } else if actual.kind == TokenType::IDENT {
+            let next1 = self.peek(1).ok_or(ParserError::UnexpectedEOF)?;
+            if next1.kind == TokenType::LBRACKET{
+                self.parse_var_name()?;
+                self.assert(TokenType::LBRACKET);
+                self.parse_expression()?;
+                self.assert(TokenType::RBRACKET);
+            }
         }
         
 
