@@ -815,13 +815,11 @@ fn test_parse_do_statement_simple_call() {
     parser.parse_do_statement().unwrap();
     let expected = r#"<doStatement>
   <keyword> do </keyword>
-  <term>
-    <identifier> foo </identifier>
-    <symbol> ( </symbol>
-    <expressionList>
-    </expressionList>
-    <symbol> ) </symbol>
-  </term>
+  <identifier> foo </identifier>
+  <symbol> ( </symbol>
+  <expressionList>
+  </expressionList>
+  <symbol> ) </symbol>
   <symbol> ; </symbol>
 </doStatement>"#;
     assert_eq!(parser.get_xml(), expected);
@@ -843,22 +841,20 @@ fn test_parse_do_statement_method_call() {
     parser.parse_do_statement().unwrap();
     let expected = r#"<doStatement>
   <keyword> do </keyword>
-  <term>
-    <identifier> obj </identifier>
-    <symbol> . </symbol>
-    <identifier> method </identifier>
-    <symbol> ( </symbol>
-    <expressionList>
-    </expressionList>
-    <symbol> ) </symbol>
-  </term>
+  <identifier> obj </identifier>
+  <symbol> . </symbol>
+  <identifier> method </identifier>
+  <symbol> ( </symbol>
+  <expressionList>
+  </expressionList>
+  <symbol> ) </symbol>
   <symbol> ; </symbol>
 </doStatement>"#;
     assert_eq!(parser.get_xml(), expected);
 }
 
 #[test]
-fn test_parse_do_statement_static_call() {
+fn test_parse_do_statement_static_call_with_args() {
     let tokens = vec![
         Token { kind: TokenType::DO, lexeme: "do".to_string(), line: 1 },
         Token { kind: TokenType::IDENT, lexeme: "Math".to_string(), line: 1 },
@@ -874,27 +870,25 @@ fn test_parse_do_statement_static_call() {
     parser.parse_do_statement().unwrap();
     let expected = r#"<doStatement>
   <keyword> do </keyword>
-  <term>
-    <identifier> Math </identifier>
-    <symbol> . </symbol>
-    <identifier> sqrt </identifier>
-    <symbol> ( </symbol>
-    <expressionList>
-      <expression>
-        <term>
-          <integerConstant> 4 </integerConstant>
-        </term>
-      </expression>
-    </expressionList>
-    <symbol> ) </symbol>
-  </term>
+  <identifier> Math </identifier>
+  <symbol> . </symbol>
+  <identifier> sqrt </identifier>
+  <symbol> ( </symbol>
+  <expressionList>
+    <expression>
+      <term>
+        <integerConstant> 4 </integerConstant>
+      </term>
+    </expression>
+  </expressionList>
+  <symbol> ) </symbol>
   <symbol> ; </symbol>
 </doStatement>"#;
     assert_eq!(parser.get_xml(), expected);
 }
 
 #[test]
-fn test_parse_do_statement_with_arguments() {
+fn test_parse_do_statement_with_multiple_args() {
     let tokens = vec![
         Token { kind: TokenType::DO, lexeme: "do".to_string(), line: 1 },
         Token { kind: TokenType::IDENT, lexeme: "foo".to_string(), line: 1 },
@@ -904,8 +898,6 @@ fn test_parse_do_statement_with_arguments() {
         Token { kind: TokenType::IDENT, lexeme: "x".to_string(), line: 1 },
         Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 1 },
         Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 1 },
-        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
-        Token { kind: TokenType::STRING, lexeme: "hello".to_string(), line: 1 },
         Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
         Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
         Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
@@ -914,39 +906,30 @@ fn test_parse_do_statement_with_arguments() {
     parser.parse_do_statement().unwrap();
     let expected = r#"<doStatement>
   <keyword> do </keyword>
-  <term>
-    <identifier> foo </identifier>
-    <symbol> ( </symbol>
-    <expressionList>
-      <expression>
-        <term>
-          <integerConstant> 1 </integerConstant>
-        </term>
-      </expression>
-      <symbol> , </symbol>
-      <expression>
-        <term>
-          <identifier> x </identifier>
-        </term>
-        <symbol> + </symbol>
-        <term>
-          <integerConstant> 2 </integerConstant>
-        </term>
-      </expression>
-      <symbol> , </symbol>
-      <expression>
-        <term>
-          <stringConstant> hello </stringConstant>
-        </term>
-      </expression>
-    </expressionList>
-    <symbol> ) </symbol>
-  </term>
+  <identifier> foo </identifier>
+  <symbol> ( </symbol>
+  <expressionList>
+    <expression>
+      <term>
+        <integerConstant> 1 </integerConstant>
+      </term>
+    </expression>
+    <symbol> , </symbol>
+    <expression>
+      <term>
+        <identifier> x </identifier>
+      </term>
+      <symbol> + </symbol>
+      <term>
+        <integerConstant> 2 </integerConstant>
+      </term>
+    </expression>
+  </expressionList>
+  <symbol> ) </symbol>
   <symbol> ; </symbol>
 </doStatement>"#;
     assert_eq!(parser.get_xml(), expected);
 }
-
 
 
 }

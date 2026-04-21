@@ -182,6 +182,14 @@ impl Parser {
 
     }
     
+    pub fn parse_do_statement(&mut self) -> Result<(), ParserError>{
+        self.open_tag("doStatement");
+        self.assert(TokenType::DO);
+        self.parse_subroutine_call()?;
+        self.assert(TokenType::SEMICOLON);
+        self.close_tag("doStatement");
+        Ok(())
+    }
     
     pub fn parse_expression(&mut self) -> Result<(), ParserError>{
         let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
