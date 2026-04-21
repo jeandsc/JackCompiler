@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use JackCompiler::scanner::{Scanner};
-    use JackCompiler::parser::{Parser}; 
+    use JackCompiler::parser::{self, Parser}; 
     use JackCompiler::token::{Token, TokenType};
     use std::fs;
     use std::path::Path;
@@ -2206,7 +2206,7 @@ fn test_parse_class_main() {
         Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 26 },
     ];
     let mut parser = Parser::new(tokens);
-    parser.parse_class().unwrap();
+    parser.parse_code().unwrap();
 
     let expected = r#"<class>
   <keyword> class </keyword>
@@ -2455,5 +2455,42 @@ fn test_parse_class_main() {
 
     assert_eq!(parser.get_xml(), expected);
 }
+
+#[test]
+fn test_todos_os_codigos_nand2tetris(){
+        let pasta = "tests/nand2tetris_files/Square";
+        let mut arquivos_jack:Vec<String> = Vec::new();
+        let mut arquivos_referencia:Vec<String> = Vec::new();
+
+        for entry in fs::read_dir(pasta).unwrap() {
+            let entry = entry.unwrap();
+            let file_name = entry.file_name(); 
+            let file_str = file_name.to_string_lossy().to_string(); 
+            
+            if file_str.ends_with(".jack") {
+                arquivos_jack.push(file_str.clone()); 
+                arquivos_referencia.push(file_str.replace(".jack", ".xml"));
+            }
+        }
+        
+        for i in 0..arquivos_jack.len(){
+            let path_jack = format!("{}/{}",pasta, arquivos_jack[i]);
+            let path_referencia = format!("{}/{}",pasta, arquivos_referencia[i]);
+            
+            let code =fs::read_to_string(path_jack).expect("Falha ao ler arquivo");
+            let mut xml_referencia = fs::read_to_string(path_referencia).expect("Falha ao ler arquivo");
+            let mut scanner = Scanner::new(code);
+            let tokens = scanner.tokenize().clone();
+            let mut parser = Parser::new(tokens);
+            parser.parse_code().unwrap();
+            let mut xml_gerado = parser.get_xml();
+
+            xml_gerado = xml_gerado.replace("\r\n", "\n").trim_end().to_string();
+            xml_referencia = xml_referencia.replace("\r\n", "\n").trim_end().to_string();
+           
+            assert_eq!(xml_gerado, xml_referencia);
+            
+        }
+    }
 
 }

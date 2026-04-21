@@ -79,12 +79,13 @@ impl Parser {
     pub fn get_xml(&mut self)->String{
             self.xml_output.join("\n")
     }
-    pub fn parse_code(&mut self){
-        self.parse_class();
+    pub fn parse_code(&mut self)->Result<(), ParserError>{
+        self.parse_class()?;
+        Ok(())
     }
     fn parse_class(&mut self) ->Result<(), ParserError>{
         let modifiers = [TokenType::STATIC, TokenType::FIELD];
-        let modifiers_subroutine = [TokenType::CONSTRUCTOR, TokenType::FIELD];
+        let modifiers_subroutine = [TokenType::CONSTRUCTOR, TokenType::FUNCTION, TokenType::METHOD];
         self.open_tag("class");
         self.assert(TokenType::CLASS);
         self.assert(TokenType::IDENT);
@@ -93,6 +94,11 @@ impl Parser {
         while modifiers.contains(&actual.kind){
             self.parse_class_var_dec()?;
             actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        }
+        while modifiers_subroutine.contains(&actual.kind) {
+            self.parse_subroutine_dec()?;
+            actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+            
         }
         self.assert(TokenType::RBRACE);
         self.assert(TokenType::EOF);
