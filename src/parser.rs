@@ -181,7 +181,26 @@ impl Parser {
         self.close_tag("varDec");
         Ok(())
     }
-
+    pub fn parse_parameter_list (&mut self) -> Result<(), ParserError> {
+        self.open_tag("parameterList");
+        let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        if actual.kind == TokenType::RPAREN{
+            self.close_tag("parameterList");
+            return Ok(());
+        }
+        self.parse_type()?;
+        self.parse_var_name()?;
+        actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        while actual.kind==TokenType::COMMA {
+            self.assert(TokenType::COMMA);
+            self.parse_type()?;
+            self.parse_var_name()?;
+            actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        }
+        self.close_tag("parameterList");
+        
+        Ok(())
+    }
     pub fn parse_subroutine_body (&mut self) -> Result<(), ParserError> {
         self.open_tag("subroutineBody");
         self.assert(TokenType::LBRACE);
