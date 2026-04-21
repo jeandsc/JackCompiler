@@ -801,5 +801,152 @@ fn test_parse_return_statement_with_expression() {
     assert_eq!(parser.get_xml(), expected);
 }
 
+#[test]
+fn test_parse_do_statement_simple_call() {
+    let tokens = vec![
+        Token { kind: TokenType::DO, lexeme: "do".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "foo".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_do_statement().unwrap();
+    let expected = r#"<doStatement>
+  <keyword> do </keyword>
+  <term>
+    <identifier> foo </identifier>
+    <symbol> ( </symbol>
+    <expressionList>
+    </expressionList>
+    <symbol> ) </symbol>
+  </term>
+  <symbol> ; </symbol>
+</doStatement>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_do_statement_method_call() {
+    let tokens = vec![
+        Token { kind: TokenType::DO, lexeme: "do".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "obj".to_string(), line: 1 },
+        Token { kind: TokenType::DOT, lexeme: ".".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "method".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_do_statement().unwrap();
+    let expected = r#"<doStatement>
+  <keyword> do </keyword>
+  <term>
+    <identifier> obj </identifier>
+    <symbol> . </symbol>
+    <identifier> method </identifier>
+    <symbol> ( </symbol>
+    <expressionList>
+    </expressionList>
+    <symbol> ) </symbol>
+  </term>
+  <symbol> ; </symbol>
+</doStatement>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_do_statement_static_call() {
+    let tokens = vec![
+        Token { kind: TokenType::DO, lexeme: "do".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "Math".to_string(), line: 1 },
+        Token { kind: TokenType::DOT, lexeme: ".".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "sqrt".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "4".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_do_statement().unwrap();
+    let expected = r#"<doStatement>
+  <keyword> do </keyword>
+  <term>
+    <identifier> Math </identifier>
+    <symbol> . </symbol>
+    <identifier> sqrt </identifier>
+    <symbol> ( </symbol>
+    <expressionList>
+      <expression>
+        <term>
+          <integerConstant> 4 </integerConstant>
+        </term>
+      </expression>
+    </expressionList>
+    <symbol> ) </symbol>
+  </term>
+  <symbol> ; </symbol>
+</doStatement>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_do_statement_with_arguments() {
+    let tokens = vec![
+        Token { kind: TokenType::DO, lexeme: "do".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "foo".to_string(), line: 1 },
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "x".to_string(), line: 1 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        Token { kind: TokenType::STRING, lexeme: "hello".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_do_statement().unwrap();
+    let expected = r#"<doStatement>
+  <keyword> do </keyword>
+  <term>
+    <identifier> foo </identifier>
+    <symbol> ( </symbol>
+    <expressionList>
+      <expression>
+        <term>
+          <integerConstant> 1 </integerConstant>
+        </term>
+      </expression>
+      <symbol> , </symbol>
+      <expression>
+        <term>
+          <identifier> x </identifier>
+        </term>
+        <symbol> + </symbol>
+        <term>
+          <integerConstant> 2 </integerConstant>
+        </term>
+      </expression>
+      <symbol> , </symbol>
+      <expression>
+        <term>
+          <stringConstant> hello </stringConstant>
+        </term>
+      </expression>
+    </expressionList>
+    <symbol> ) </symbol>
+  </term>
+  <symbol> ; </symbol>
+</doStatement>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+
 
 }
