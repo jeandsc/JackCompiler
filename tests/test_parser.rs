@@ -338,6 +338,7 @@ fn test_parse_expression_unary_operators() {
 #[test]
 fn test_parse_expression_list_empty() {
     let tokens = vec![
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
         Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
     ];
     let mut parser = Parser::new(tokens);
@@ -392,31 +393,49 @@ fn test_parse_expression_list_two() {
 }
 
 #[test]
-fn test_parse_expression_list_three() {
+fn test_parse_expression_list_complex_no_varname_no_outer_parens() {
     let tokens = vec![
+        // Primeira expressão: (1+2)*3  (note que esta expressão tem seus próprios parênteses internos)
+        Token { kind: TokenType::LPAREN, lexeme: "(".to_string(), line: 1 },
         Token { kind: TokenType::NUMBER, lexeme: "1".to_string(), line: 1 },
-        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
-        Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 1 },
         Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "2".to_string(), line: 1 },
+        Token { kind: TokenType::RPAREN, lexeme: ")".to_string(), line: 1 },
+        Token { kind: TokenType::ASTERISK, lexeme: "*".to_string(), line: 1 },
         Token { kind: TokenType::NUMBER, lexeme: "3".to_string(), line: 1 },
         Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
-        Token { kind: TokenType::IDENT, lexeme: "x".to_string(), line: 1 },
+        // Segunda expressão: -5 + ~true
+        Token { kind: TokenType::MINUS, lexeme: "-".to_string(), line: 1 },
+        Token { kind: TokenType::NUMBER, lexeme: "5".to_string(), line: 1 },
+        Token { kind: TokenType::PLUS, lexeme: "+".to_string(), line: 1 },
+        Token { kind: TokenType::NOT, lexeme: "~".to_string(), line: 1 },
+        Token { kind: TokenType::TRUE, lexeme: "true".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        // Terceira expressão: "hello" & false
+        Token { kind: TokenType::STRING, lexeme: "hello".to_string(), line: 1 },
+        Token { kind: TokenType::AND, lexeme: "&".to_string(), line: 1 },
+        Token { kind: TokenType::FALSE, lexeme: "false".to_string(), line: 1 },
         Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
     ];
     let mut parser = Parser::new(tokens);
     parser.parse_expression_list().unwrap();
+
     let expected = r#"<expressionList>
   <expression>
     <term>
-      <integerConstant> 1 </integerConstant>
+      <symbol> ( </symbol>
+      <expression>
+        <term>
+          <integerConstant> 1 </integerConstant>
+        </term>
+        <symbol> + </symbol>
+        <term>
+          <integerConstant> 2 </integerConstant>
+        </term>
+      </expression>
+      <symbol> ) </symbol>
     </term>
-  </expression>
-  <symbol> , </symbol>
-  <expression>
-    <term>
-      <integerConstant> 2 </integerConstant>
-    </term>
-    <symbol> + </symbol>
+    <symbol> * </symbol>
     <term>
       <integerConstant> 3 </integerConstant>
     </term>
@@ -424,11 +443,31 @@ fn test_parse_expression_list_three() {
   <symbol> , </symbol>
   <expression>
     <term>
-      <identifier> x </identifier>
+      <symbol> - </symbol>
+      <term>
+        <integerConstant> 5 </integerConstant>
+      </term>
+    </term>
+    <symbol> + </symbol>
+    <term>
+      <symbol> ~ </symbol>
+      <term>
+        <keyword> true </keyword>
+      </term>
+    </term>
+  </expression>
+  <symbol> , </symbol>
+  <expression>
+    <term>
+      <stringConstant> hello </stringConstant>
+    </term>
+    <symbol> &amp; </symbol>
+    <term>
+      <keyword> false </keyword>
     </term>
   </expression>
 </expressionList>"#;
+
     assert_eq!(parser.get_xml(), expected);
 }
-
 }

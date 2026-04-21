@@ -231,4 +231,21 @@ impl Parser {
         Ok(())
         
     }
+    pub fn parse_expression_list(&mut self)->Result<(), ParserError>{
+        self.open_tag("expressionList");
+        let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        if actual.kind == TokenType::RPAREN{
+            self.close_tag("expressionList");
+            return  Ok(());
+        }
+        self.parse_expression();
+        actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        while actual.kind == TokenType::COMMA {
+            self.assert(TokenType::COMMA);
+            self.parse_expression();
+            actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;     
+        }
+        self.close_tag("expressionList");
+        Ok(())
+    }
 }
