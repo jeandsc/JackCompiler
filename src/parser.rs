@@ -162,7 +162,24 @@ impl Parser {
         self.assert(TokenType::IDENT);
         Ok(())
     }
-    
+    fn parse_subroutine_name(&mut self) -> Result<(), ParserError> {
+        self.assert(TokenType::IDENT);
+        Ok(())
+    }
+    fn var_dec(&mut self) -> Result<(), ParserError> {
+        self.assert(TokenType::VAR);
+        self.parse_type()?;
+        self.parse_var_name()?;
+        let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        while actual.kind == TokenType::COMMA {
+            self.assert(TokenType::COMMA);
+            self.parse_var_name()?;
+            actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        }
+        
+        Ok(())
+    }
+
     pub fn parse_statements(&mut self)->Result<(), ParserError>{
         let statements_keywords = [TokenType::LET,TokenType::DO, TokenType::RETURN, TokenType::IF, TokenType::WHILE];
         let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
@@ -367,7 +384,7 @@ impl Parser {
     fn parse_subroutine_call(&mut self) -> Result<(), ParserError> {
         let next1 = self.peek(1).ok_or(ParserError::UnexpectedEOF)?;
         if next1.kind == TokenType::LPAREN{
-                self.parse_var_name()?;
+                self.parse_subroutine_name()?;
                 self.assert(TokenType::LPAREN);
                 self.parse_expression_list()?;
                 self.assert(TokenType::RPAREN);
@@ -375,7 +392,7 @@ impl Parser {
         if next1.kind == TokenType::DOT{
                 self.parse_class_name()?;
                 self.assert(TokenType::DOT);
-                self.parse_var_name()?;
+                self.parse_subroutine_name()?;
                 self.assert(TokenType::LPAREN);
                 self.parse_expression_list()?;
                 self.assert(TokenType::RPAREN);
@@ -383,4 +400,5 @@ impl Parser {
         }
         Ok(())
     }
+    
 }

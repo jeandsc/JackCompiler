@@ -1339,4 +1339,72 @@ fn test_parse_statements_nested_if_while() {
     assert_eq!(parser.get_xml(), expected);
 }
 
+#[test]
+fn test_parse_var_dec_single() {
+    let tokens = vec![
+        Token { kind: TokenType::VAR, lexeme: "var".to_string(), line: 1 },
+        Token { kind: TokenType::INT, lexeme: "int".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "x".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_var_dec().unwrap();
+    let expected = r#"<varDec>
+  <keyword> var </keyword>
+  <keyword> int </keyword>
+  <identifier> x </identifier>
+  <symbol> ; </symbol>
+</varDec>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_var_dec_multiple() {
+    let tokens = vec![
+        Token { kind: TokenType::VAR, lexeme: "var".to_string(), line: 1 },
+        Token { kind: TokenType::INT, lexeme: "int".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "i".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "j".to_string(), line: 1 },
+        Token { kind: TokenType::COMMA, lexeme: ",".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "k".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_var_dec().unwrap();
+    let expected = r#"<varDec>
+  <keyword> var </keyword>
+  <keyword> int </keyword>
+  <identifier> i </identifier>
+  <symbol> , </symbol>
+  <identifier> j </identifier>
+  <symbol> , </symbol>
+  <identifier> k </identifier>
+  <symbol> ; </symbol>
+</varDec>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
+#[test]
+fn test_parse_var_dec_different_types() {
+    let tokens = vec![
+        Token { kind: TokenType::VAR, lexeme: "var".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "String".to_string(), line: 1 },
+        Token { kind: TokenType::IDENT, lexeme: "s".to_string(), line: 1 },
+        Token { kind: TokenType::SEMICOLON, lexeme: ";".to_string(), line: 1 },
+        Token { kind: TokenType::EOF, lexeme: "".to_string(), line: 1 },
+    ];
+    let mut parser = Parser::new(tokens);
+    parser.parse_var_dec().unwrap();
+    let expected = r#"<varDec>
+  <keyword> var </keyword>
+  <identifier> String </identifier>
+  <identifier> s </identifier>
+  <symbol> ; </symbol>
+</varDec>"#;
+    assert_eq!(parser.get_xml(), expected);
+}
+
 }
