@@ -201,7 +201,7 @@ impl Parser {
         
         Ok(())
     }
-    pub fn parse_subroutine_body (&mut self) -> Result<(), ParserError> {
+    pub fn parse_subroutine_body(&mut self) -> Result<(), ParserError> {
         self.open_tag("subroutineBody");
         self.assert(TokenType::LBRACE);
         let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
@@ -212,6 +212,55 @@ impl Parser {
         self.parse_statements()?;
         self.assert(TokenType::RBRACE);
         self.close_tag("subroutineBody");
+        Ok(())
+    }
+
+    pub fn parse_subroutine_dec (&mut self) -> Result<(), ParserError> {
+        self.open_tag("subroutineDec");
+        let mut actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+        if actual.kind == TokenType::CONSTRUCTOR {
+            self.assert(TokenType::CONSTRUCTOR);
+            actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+            if actual.kind == TokenType::VOID {
+                self.assert(TokenType::VOID);
+            } else {
+                self.parse_type()?;
+            }
+            self.parse_subroutine_name()?;
+            self.assert(TokenType::LPAREN);
+            self.parse_parameter_list()?;
+            self.assert(TokenType::RPAREN);
+            self.parse_subroutine_body()?;
+
+        } else if actual.kind == TokenType::FUNCTION {
+            self.assert(TokenType::FUNCTION);
+            actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+            if actual.kind == TokenType::VOID {
+                self.assert(TokenType::VOID);
+            } else {
+                self.parse_type()?;
+            }
+            self.parse_subroutine_name()?;
+            self.assert(TokenType::LPAREN);
+            self.parse_parameter_list()?;
+            self.assert(TokenType::RPAREN);
+            self.parse_subroutine_body()?;
+            
+        } else if actual.kind == TokenType::METHOD {
+            self.assert(TokenType::METHOD);
+            actual = self.peek(0).ok_or(ParserError::UnexpectedEOF)?;
+            if actual.kind == TokenType::VOID {
+                self.assert(TokenType::VOID);
+            } else {
+                self.parse_type()?;
+            }
+            self.parse_subroutine_name()?;
+            self.assert(TokenType::LPAREN);
+            self.parse_parameter_list()?;
+            self.assert(TokenType::RPAREN);
+            self.parse_subroutine_body()?;
+        }
+        self.close_tag("subroutineDec");
         Ok(())
     }
 
