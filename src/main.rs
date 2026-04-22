@@ -11,6 +11,7 @@ use std::io::Write;
 
 
 use crate::scanner::{ Scanner};
+use crate::parser::{Parser};
 use crate::xml_generator::generate_xml;
 
 fn salvar_xml(pasta: &str, nome_arquivo: &str, conteudo: &str) -> std::io::Result<()> {
@@ -40,7 +41,7 @@ fn main() {
             
             if file_str.ends_with(".jack") {
                 arquivos_jack.push(file_str.clone()); 
-                arquivos_referencia.push(file_str.replace(".jack", "T.xml"));
+                arquivos_referencia.push(file_str.replace(".jack", ".xml"));
             }
     }
         
@@ -51,15 +52,18 @@ fn main() {
             
             let code =fs::read_to_string(path_jack).expect("Falha ao ler arquivo");
             let mut xml_referencia = fs::read_to_string(path_referencia).expect("Falha ao ler arquivo");
-            let scanner = Scanner::new(code);
-            let mut xml_gerado = generate_xml(scanner);
+            let mut scanner = Scanner::new(code);
+            let tokens = scanner.tokenize().clone();
+            let mut parser = Parser::new(tokens);
+            parser.parse_code().unwrap();
+            let mut xml_gerado = parser.get_xml();
 
             if let Err(e) = salvar_xml(output, &format!("{}", arquivos_jack[i]).replace(".jack", "T.xml"), &xml_gerado) {
                 println!("Erro ao salvar XML: {}", e);
             }
             
-            xml_gerado = xml_gerado.replace("\r\n", "\n");
-            xml_referencia = xml_referencia.replace("\r\n", "\n");
+            xml_gerado = xml_gerado.replace("\r\n", "\n").trim_end().to_string();
+            xml_referencia = xml_referencia.replace("\r\n", "\n").trim_end().to_string();
            
             assert_eq!(xml_gerado, xml_referencia);
 
