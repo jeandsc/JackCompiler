@@ -58,7 +58,7 @@ fn main() {
             parser.parse_code().unwrap();
             let mut xml_gerado = parser.get_xml();
 
-            if let Err(e) = salvar_xml(output, &format!("{}", arquivos_jack[i]).replace(".jack", "T.xml"), &xml_gerado) {
+            if let Err(e) = salvar_xml(output, &format!("{}", arquivos_jack[i]).replace(".jack", ".xml"), &xml_gerado) {
                 println!("Erro ao salvar XML: {}", e);
             }
             
