@@ -21,7 +21,7 @@ A linguagem de programação escolhida para a construção do compilador é:
 
 cargo run
 
-O parser irá processar todos os arquivos .jack encontrados no diretório e gerar os arquivos XML de saída em output/Square/ com o sufixo T.xml (ex.: MainT.xml, SquareT.xml, SquareGameT.xml).
+O parser irá processar todos os arquivos .jack encontrados no diretório e gerar os arquivos XML de saída em output/Square/ com o sufixo T.xml (ex.: Main.xml, Square.xml, SquareGame.xml).
 
 ### Executar Testes
 
